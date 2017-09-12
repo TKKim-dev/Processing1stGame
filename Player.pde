@@ -1,7 +1,7 @@
 class Player {
   int playernum; // 몇번째 플레이어 인지!
   PVector location, velocity, pvelocity // 좌표, 그리고 이동에 관련된 벡터들
-  float movSpeed; // 플레이어의 이동 속도, movSpeed=1 은 
+  float movSpeed; // 플레이어의 이동 속도, movSpeed=x은 플레이어가 x pixels per frame 의 속도로 이동함을 뜻함
   float radius; // 플레이어 개체의 크기
   float movframecount; // 이동 시에 사용되는 변수. =0 일 때 이동 stop, movement=0
   float CCframecount; // CC가 얼마나 지속되는지, =0 일 때 CC 끝
