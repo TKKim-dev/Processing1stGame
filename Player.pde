@@ -14,7 +14,6 @@ class Player {
   Table CCtable = loadTable("CCtable.csv"); // ※아직 구현 안됨※ 미리 정해진 CC 테이블 [CC상태][이동 속도][지속시간(ccframecount)] ex) [0][0] [0][1] [0][2] 순서대로
   Table WPtable = loadTable("WPtable.csv"); // ※아직 구현 안됨※ [무기 타입] [총알 속도] [무기 쿨타임] [무기 데미지] 
 
-
   Player(int pNum, float x, float y) {
     this.playerNum=pNum; // 몇번째 플레이어인지 미리 input
     this.moveSpeed=1;

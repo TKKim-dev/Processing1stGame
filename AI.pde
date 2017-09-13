@@ -28,6 +28,7 @@ class AI {
     stroke(225, 111, 0, 80);
     line(location.x, location.y, pvelocity.x, pvelocity.y);
   }
+  
   void randomize() {
     if (randTimer == 0) {
       velocity=new PVector(random(0, width), random(0, height));
@@ -39,7 +40,7 @@ class AI {
     }
   }
 
-  void update_AI() {                               // AI의 
+  void update() {                               // AI의 
     if (movDistance > 0.2) {
       location.add(velocity.x*movSpeed, velocity.y*movSpeed);
       movDistance -= movSpeed;
@@ -50,6 +51,6 @@ class AI {
   void run() {
     display();
     randomize();
-    update_AI();
+    update();
   }
 }
