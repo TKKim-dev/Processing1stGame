@@ -4,7 +4,7 @@ class Player {
   float movSpeed; // 플레이어의 이동 속도, movSpeed=x은 플레이어가 x pixels per frame 의 속도로 이동함을 뜻함
   float fireSpeed; // 플레이어의 발사 속도. 나중에 공격 속도를 올릴 때는 이 변수를 바꾸면 된다.
   float radius; // 플레이어 개체의 크기
-  float movframecount; // 이동 시에 사용되는 변수. 이동이 얼마나 남았는지.
+  float movDistance; // 이동 시에 사용되는 변수. 이동이 얼마나 남았는지.
   float CCframecount; // CC가 얼마나 지속되는지, =0 일 때 CC 끝
   int[] playerStatus=new int[2]; // [플레이어의 체력] [걸린 CC기 개수] [?] [?] 
   int[] CCStatus=new int[6]; // 우선 최대 6개까지 동시에 CC기가 걸릴 수 있다고 가정. 각각의 값은 CC번호를 가진다.
@@ -17,18 +17,18 @@ class Player {
   
   Player(int pNum,float x,float y){
     this.playernum=pNum; // 몇번째 플레이어인지 미리 input
-    this.movSpeed=3;
-    this.fireSpeed=4;
+    this.movSpeed=1;
+    this.fireSpeed=2;
     this.radius=30;
     this.location=new PVector(x,y);
     this.velocity=new PVector(0,0);
     this.pvelocity=new PVector(0,0);
     this.CCframecount=0;
     this.weapon_cooltime=0;
-    for(int num=0;num<6;num++) {
+    /*for(int num=0;num<6;num++) {
       CCStatus[num]=0;
     }
-    CCStatus[5]=10;
+    CCStatus[5]=10;*/
   }
   
   void display() {
@@ -39,13 +39,14 @@ class Player {
     rotate(velocity.heading());
     rect(0,0,radius,radius);
     popMatrix();
-    
-    stroke(30,144,255,80);
-    line(location.x , location.y , pvelocity.x , pvelocity.y);  
+    if(isMoving() == true) {
+      stroke(30,144,255,80);
+      line(location.x , location.y , pvelocity.x , pvelocity.y);  
+    }
   }
   
   void update_player() {                               //플레이어의 다양한 정보 업데이트. 체력 상태, CC상태 등등
-    if(isAbleTo('m')==true && movframecount>0) {
+    if(isAbleTo('m')==true && movDistance>0) {
       location.add(velocity.x*movSpeed,velocity.y*movSpeed);
     }
   }
@@ -55,7 +56,7 @@ class Player {
       weapon_cooltime -= fireSpeed;
     }
     if(isMoving() == true) {
-      movframecount-=1;
+      movDistance -= movSpeed;
     }
     //skill_cooltime[] -= ?  나중에 스킬 관련 쿨타임 감소도 구현하기
   }
@@ -73,7 +74,7 @@ class Player {
         velocity=new PVector(mouseX,mouseY);
         pvelocity.set(velocity);            // b.set(a): b 벡터를 a 벡터와 같은 내용으로 초기화
         velocity.sub(location);            // sub(): 벡터의 빼기 연산. 원래의 velocity 벡터는 단순히 mouseX,mouseY 만을 가지므로, 처음 위치에서 빼줄 필요가 있음
-        movframecount=velocity.mag() / movSpeed;      // mag(): 벡터의 크기를 구하는 연산(즉 총 이동 거리를 구함)
+        movDistance = velocity.mag();      // mag(): 벡터의 크기를 구하는 연산(즉 총 이동 거리를 구함)
         velocity.normalize();               // normalize 는 해당 벡터의 크기를 1로 만드는 효과임. 즉 (cosθ,sinθ)가 되어 자동으로 방향을 나타내게 됨
        }
       if(mouseButton == LEFT) {
@@ -127,10 +128,10 @@ class Player {
   }
   
   boolean isMoving() {
-    if(isAbleTo('m')==true && movframecount>0.2) { // 움직일 수 있고 움직일 거리가 남았다면 움직이는 것으로 가정. 나중에 프레임 카운트 대신 거리 개념으로~!
+    if(isAbleTo('m')==true && movDistance>0.2) { // 움직일 수 있고 움직일 거리가 남았다면 움직이는 것으로 가정. 나중에 프레임 카운트 대신 거리 개념으로~!
       return true;
     }
-    movframecount=0;
+    movDistance=0;
     return false;
   }
   
