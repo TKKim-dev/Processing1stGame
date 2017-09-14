@@ -6,7 +6,7 @@ class Player {
   float radius; // 플레이어 개체의 크기
   float distanceLeft; // 이동 시에 사용되는 변수. 이동이 얼마나 남았는지.
   float CCFrameCount; // CC가 얼마나 지속되는지, =0 일 때 CC 끝
-  int[] playerStatus=new int[2]; // [플레이어의 체력] [걸린 CC기 개수] [?] [?] 
+  int[] playerStatus=new int[2]; // [플레이어의 체력] [걸린 CC기 개수] [?] [?]
   int[] CCStatus=new int[6]; // 우선 최대 6개까지 동시에 CC기가 걸릴 수 있다고 가정. 각각의 값은 CC번호를 가진다.
   PVector bulletLocation, bulletVelocity; // 플레이어가 지정한 공격 위치, 총알이 나가는 방향
   float weaponCooltime; // 다시 발사 가능할때까지 걸리는 시간
@@ -16,7 +16,7 @@ class Player {
 
   Player(int pNum, float x, float y) {
     this.playerNum=pNum; // 몇번째 플레이어인지 미리 input
-    this.moveSpeed=1;
+    this.moveSpeed=2;
     this.fireSpeed=2;
     this.radius=30;
     this.location=new PVector(x, y);
@@ -24,10 +24,6 @@ class Player {
     this.pVelocity=new PVector(0, 0);
     this.CCFrameCount=0;
     this.weaponCooltime=0;
-    /*for(int num=0;num<6;num++) {
-     CCStatus[num]=0;
-     }
-     CCStatus[5]=10;*/
   }
 
   void display() {
@@ -39,7 +35,8 @@ class Player {
     rect(0, 0, radius, radius);
     popMatrix();
     if (isMoving()) {
-      stroke(30, 144, 255, 80);
+      strokeWeight(2);
+      stroke(30, 100, 255, 80);
       line(location.x, location.y, pVelocity.x, pVelocity.y);
     }
   }

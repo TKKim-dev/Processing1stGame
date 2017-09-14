@@ -1,4 +1,4 @@
-class Bullet {
+class Bullet {  // 누구 총알인지는 상관 없고 그냥 이동 & 그래픽으로 나타내는 역할만
   PVector location, velocity;
   int radius;
   int weaponType;
