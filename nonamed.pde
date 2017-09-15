@@ -1,12 +1,17 @@
-Player p1; //<>// //<>// //<>//
+import processing.sound.*; //<>//
+
+Player p1; //<>// //<>//
+SoundFile hitSound; = new SoundFile(this, "hitSound.wav");
 AI AI1;
 
 void setup() {
   smooth();
+  frameRate(75);
   background(255);
   rectMode(CENTER);
   p1=new Player(1, 200, 200); // 200은 initail location
   AI1=new AI();
+  hitSound = new SoundFile(this, "hitSound.wav");
 }
 
 void settings() {
@@ -30,6 +35,10 @@ public void displayBullets() {
   {
     temp.display();
   }
+  for (Bullet temp : AI1.bulletList)
+  {
+    temp.display();
+  }
 }
 public void updateBullets() {
   for (Bullet temp : p1.bulletList)
@@ -38,9 +47,20 @@ public void updateBullets() {
     if(calculateCollision(AI1.collisionShape,temp.bulletCollisionShape)) {  // bullet 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
       temp.deactivateBullet();
       AI1.setHitEvent(true);
+      hitSound.play();
       text("!!!", AI1.location.x - 5, AI1.location.y - 30);
     }
   }
+  
+  for (Bullet temp : AI1.bulletList)
+  {
+    temp.update();
+    if(calculateCollision(p1.collisionShape,temp.bulletCollisionShape)) {  // bullet 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
+      temp.deactivateBullet();
+      AI1.setHitEvent(true);
+      text("!!!", p1.location.x - 5, p1.location.y - 30);
+    }    
+  }  
 }
 
 boolean calculateCollision(CollisionShape objectA, CollisionShape objectB) { // 양 Shape 같의 충돌 판정. 원과 사각형 두 가지로 나타내었으므로, 각각이 다른 계산 과정을 가져야 함
@@ -71,6 +91,19 @@ boolean calculateCollision(CollisionShape objectA, CollisionShape objectB) { // 
          verValue *= -1;
        }
        if(horValue < objectA.shapeWidth/2 && verValue < objectA.shapeHeight/2) {  // 충돌 감지!
+         return true;
+       }
+     }
+     for(PVector temp : coordinatesA) {
+       float horValue = (temp.x - objectB.location.x) * objectB.direction.x - (temp.y - objectB.location.y) * objectB.direction.y;
+       float verValue = (temp.x - objectB.location.x) * objectB.direction.y + (temp.y - objectB.location.y) * objectB.direction.x;
+       if(horValue < 0) {
+         horValue *= -1;
+       } 
+       if(verValue < 0) {
+         verValue *= -1;
+       }
+       if(horValue < objectB.shapeWidth/2 && verValue < objectB.shapeHeight/2) {  // 충돌 감지!
          return true;
        }
      }
