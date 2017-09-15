@@ -14,7 +14,7 @@ class Player {
   PVector bulletLocation, bulletVelocity; // 플레이어가 지정한 공격 위치, 총알이 나가는 방향
   float weaponCooltime; // 다시 발사 가능할때까지 걸리는 시간
   int weaponType;
-  CollisionShape player;
+  CollisionShape collisionShape;
   Table CCtable = loadTable("CCtable.csv"); // ※아직 구현 안됨※ 미리 정해진 CC 테이블 [CC상태][이동 속도][지속시간(ccframecount)] ex) [0][0] [0][1] [0][2] 순서대로
   Table WPtable = loadTable("WPtable.csv"); // ※아직 구현 안됨※ [무기 타입] [총알 속도] [무기 쿨타임] [무기 데미지] 
 
@@ -28,7 +28,7 @@ class Player {
     pVelocity=new PVector(0, 0);
     CCFrameCount=0;
     weaponCooltime=0;
-    /*playerCollisionList.add(*/player = new CollisionShape('R', location, velocity, radius, radius)/*)*/;  // 플레이어의 모양인 네모,
+    /*playerCollisionList.add(*/collisionShape = new CollisionShape('R', location, velocity, radius, radius)/*)*/;  // 플레이어의 모양인 네모,
   }
 
   void run() {
@@ -63,7 +63,7 @@ class Player {
     case 0:
       break;
     case 1:
-      Bullet temp = new Bullet(bulletLocation, bulletVelocity, weaponType);
+      Bullet temp = new Bullet(bulletLocation, bulletVelocity, weaponType, color(0,0,255));
       bulletList.add(temp);
       bulletCollisionList.add(new CollisionShape('R', bulletLocation, bulletVelocity, temp.bulletWidth, temp.bulletHeight));
       weaponCooltime = 20;  //  무기 쿨타임
