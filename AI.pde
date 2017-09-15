@@ -1,31 +1,39 @@
 class AI {
-  PVector location, velocity, pvelocity; // 좌표, 그리고 이동에 관련된 벡터들
+  //PVector location, velocity, pvelocity; // 좌표, 그리고 이동에 관련된 벡터들
   float movSpeed; // 플레이어의 이동 속도, movSpeed=x은 플레이어가 x pixels per frame 의 속도로 이동함을 뜻함
   float fireSpeed; // 플레이어의 발사 속도. 나중에 공격 속도를 올릴 때는 이 변수를 바꾸면 된다.
   float radius; // 플레이어 개체의 크기
   float movDistance; // 이동 시에 사용되는 변수. 이동이 얼마나 남았는지.
   float HP; // AI의 체력
   float randTimer;
-  //PVector bLoc, bVel; // 플레이어가 지정한 공격 위치, 총알이 나가는 방향
-
+  ArrayList<CollisionShape> collisionList = new ArrayList<CollisionShape>();
+  PVector location=new PVector(random(0, width), random(0, height));
+  PVector velocity=new PVector(0, 0);
+  PVector pvelocity=new PVector(0, 0);
+  CollisionShape collisionShape;
+  boolean hitEvent;
+  
   AI() {
-    this.movSpeed = 2;
-    this.radius=30;
-    this.location=new PVector(random(0, width), random(0, height));
-    this.velocity=new PVector(0, 0);
-    this.pvelocity=new PVector(0, 0);
-    this.randTimer=0;
+    movSpeed = 2;
+    radius=30;
+    randTimer=0;
+    collisionShape = new CollisionShape('R', location, velocity, radius, radius);
+    collisionList.add(collisionShape);
   }
 
   void display() {
     noStroke();
     fill(0);
+    if(hitEvent) {
+      fill(255,0,0);
+      setHitEvent(false);
+    }
     pushMatrix();
     translate(location.x, location.y);
     rotate(velocity.heading());
     rect(0, 0, radius, radius);
     popMatrix();
-    stroke(225, 111, 0, 80);
+    stroke(225, 111, 0, 100);
     line(location.x, location.y, pvelocity.x, pvelocity.y);
   }
   
@@ -43,6 +51,9 @@ class AI {
   void update() {                               // AI의 
     if (movDistance > 0.2) {
       location.add(velocity.x*movSpeed, velocity.y*movSpeed);
+      for(CollisionShape temp : collisionList) {
+        temp.update(location, velocity);
+      }
       movDistance -= movSpeed;
     }
     randTimer--;
@@ -52,5 +63,9 @@ class AI {
     display();
     randomize();
     update();
+  }
+  
+  void setHitEvent(boolean hitEvent) {
+    this.hitEvent = hitEvent;
   }
 }
