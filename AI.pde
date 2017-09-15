@@ -6,10 +6,14 @@ class AI {
   float movDistance; // 이동 시에 사용되는 변수. 이동이 얼마나 남았는지.
   float HP; // AI의 체력
   float randTimer;
+  float randBulletTimer;
   ArrayList<CollisionShape> collisionList = new ArrayList<CollisionShape>();
-  PVector location=new PVector(random(0, width), random(0, height));
-  PVector velocity=new PVector(0, 0);
-  PVector pvelocity=new PVector(0, 0);
+  PVector location = new PVector(random(0, width), random(0, height));
+  PVector velocity = new PVector(0, 0);
+  PVector pvelocity = new PVector(0, 0);
+  ArrayList<Bullet> bulletList = new ArrayList<Bullet>();
+  ArrayList<CollisionShape> bulletCollisionList = new ArrayList<CollisionShape>();
+  PVector bulletLocation, bulletVelocity; // AI가 플레이어에게 총알을 발사함
   CollisionShape collisionShape;
   boolean hitEvent;
   
@@ -17,6 +21,7 @@ class AI {
     movSpeed = 2;
     radius=30;
     randTimer=0;
+    randBulletTimer=0;
     collisionShape = new CollisionShape('R', location, velocity, radius, radius);
     collisionList.add(collisionShape);
   }
@@ -56,7 +61,23 @@ class AI {
       }
       movDistance -= movSpeed;
     }
+    if(randBulletTimer < 0) {
+      bulletLocation = new PVector(location.x, location.y);
+      bulletVelocity = new PVector(p1.location.x - location.x, p1.location.y - location.y);
+      Bullet temp = new Bullet(bulletLocation, bulletVelocity, 0,  color(255,0,0));
+      bulletList.add(temp);
+      bulletCollisionList.add(new CollisionShape('R', bulletLocation, bulletVelocity, temp.bulletWidth, temp.bulletHeight));
+      randBulletTimer=25;
+    }
     randTimer--;
+    randBulletTimer--;
+    
+    for(int i=0; i<bulletList.size(); i++) {  // 총알 삭제 파트
+      if(!bulletList.get(i).isActive) {
+        bulletList.remove(i);
+        bulletCollisionList.remove(i);
+      }
+    }
   }
 
   void run() {
