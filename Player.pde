@@ -8,27 +8,30 @@ class Player {
   float CCFrameCount; // CC가 얼마나 지속되는지, =0 일 때 CC 끝
   //int[] playerStatus=new int[2]; // [플레이어의 체력] [걸린 CC기 개수] [?] [?]
   int[] CCStatus=new int[6]; // 우선 최대 6개까지 동시에 CC기가 걸릴 수 있다고 가정. 각각의 값은 CC번호를 가진다.
-  ArrayList<Bullet> bulletList = new ArrayList<Bullet>(); // 각 bullet 은 플레이어가 관리한다.
+  ArrayList<Projectile> projectileList = new ArrayList<Projectile>(); // 각 projectile 은 플레이어가 관리한다.
   ArrayList<CollisionShape> playerCollisionList = new ArrayList<CollisionShape>();
-  ArrayList<CollisionShape> bulletCollisionList = new ArrayList<CollisionShape>();
-  PVector bulletLocation, bulletVelocity; // 플레이어가 지정한 공격 위치, 총알이 나가는 방향
+  ArrayList<CollisionShape> projectileCollisionList = new ArrayList<CollisionShape>();
+  PVector projectileLocation, projectileVelocity, skillDirection; // 플레이어가 지정한 공격 위치, 총알이 나가는 방향
   float weaponCooltime; // 다시 발사 가능할때까지 걸리는 시간
   int weaponType;
   CollisionShape collisionShape;
   Table CCtable = loadTable("CCtable.csv"); // ※아직 구현 안됨※ 미리 정해진 CC 테이블 [CC상태][이동 속도][지속시간(ccframecount)] ex) [0][0] [0][1] [0][2] 순서대로
-  Table WPtable = loadTable("WPtable.csv"); // ※아직 구현 안됨※ [무기 타입] [총알 속도] [무기 쿨타임] [무기 데미지] 
+  Table WPtable = loadTable("WPtable.csv"); // ※아직 구현 안됨※ [무기 타입] [총알 속도] [무기 쿨타임] [무기 데미지]
+  boolean hitEvent;
 
   Player(int playerNum, float x, float y) {
     this.playerNum=playerNum; // 몇번째 플레이어인지 미리 input
     moveSpeed=2;
     fireSpeed=2;
     radius=30;
-    location=new PVector(x, y);
-    velocity=new PVector(3, 3);
-    pVelocity=new PVector(0, 0);
+    location = new PVector(x, y);
+    velocity = new PVector(0, 0);
+    pVelocity = new PVector(0, 0);
+    skillDirection = new PVector(0, 0); 
     CCFrameCount=0;
     weaponCooltime=0;
     /*playerCollisionList.add(*/collisionShape = new CollisionShape('R', location, velocity, radius, radius)/*)*/;  // 플레이어의 모양인 네모,
+    hitEvent = false;
   }
 
   void run() {
@@ -36,7 +39,7 @@ class Player {
     display();
     move();
     updateCount();
-    manageBullets();
+    manageProjectiles();
   }
   
   void mouseEvent() { // 마우스 이벤트는 메시지 전달만. CC 체크는 X
@@ -50,8 +53,8 @@ class Player {
       }
       if (mouseButton == LEFT) {
         if (isAbleTo('f') == true) {
-          bulletLocation=new PVector(location.x, location.y);
-          bulletVelocity=new PVector(mouseX-location.x, mouseY-location.y);
+          projectileLocation=new PVector(location.x, location.y);
+          projectileVelocity=new PVector(mouseX-location.x, mouseY-location.y);
           fireEvent(1); // 일반적인 공격(공격 가능 상태에서 클릭을 통해 공격), 0 일때 공격제한, 혹은 여러 갈래로 발사하거나, 난사 스킬처럼 쏘는 경우 또 다른 숫자 넣어두기.
         }
       }
@@ -63,9 +66,9 @@ class Player {
     case 0:
       break;
     case 1:
-      Bullet temp = new Bullet(bulletLocation, bulletVelocity, weaponType, color(0,0,255));
-      bulletList.add(temp);
-      bulletCollisionList.add(new CollisionShape('R', bulletLocation, bulletVelocity, temp.bulletWidth, temp.bulletHeight));
+      Projectile temp = new Projectile(projectileLocation, projectileVelocity, weaponType, color(0,0,255));
+      projectileList.add(temp);
+      projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
       weaponCooltime = 20;  //  무기 쿨타임
       break;
     }
@@ -74,6 +77,10 @@ class Player {
   void display() {
     noStroke();
     fill(0);
+    if(hitEvent) {
+      fill(255,0,0);
+      setHitEvent(false);
+    }    
     pushMatrix();
     translate(location.x, location.y);
     rotate(velocity.heading());
@@ -83,6 +90,17 @@ class Player {
       strokeWeight(2);
       stroke(30, 100, 255, 80);
       line(location.x, location.y, pVelocity.x, pVelocity.y);
+    }
+    for(Skill temp : skillList) {
+      if(temp.isActiveOnReady) {
+        skillDirection.set(mouseX - location.x, mouseY - location.y);
+        pushMatrix();
+        translate(location.x, location.y);
+        rotate(skillDirection.heading());
+        fill(0, 0, 255, 80);
+        shape(temp.shapeOnReady, 50, 0, 60, 60);
+        popMatrix();
+      }
     }
   }
 
@@ -102,16 +120,20 @@ class Player {
     //skill_cooltime[] -= ?  나중에 스킬 관련 쿨타임 감소도 구현하기
   }
 
-  void manageBullets() {  // CollisionShape 업데이트
-    for(int i=0; i<bulletList.size(); i++) {
-      bulletCollisionList.get(i).update(bulletList.get(i).location, bulletList.get(i).velocity);
+  void manageProjectiles() {  // CollisionShape 업데이트
+    for(int i=0; i<projectileList.size(); i++) {
+      projectileCollisionList.get(i).update(projectileList.get(i).location, projectileList.get(i).velocity);
     }
-    for(int i=0; i<bulletList.size(); i++) {  // 총알 삭제 파트
-      if(!bulletList.get(i).isActive) {
-        bulletList.remove(i);
-        bulletCollisionList.remove(i);
+    for(int i=0; i<projectileList.size(); i++) {  // 총알 삭제 파트
+      if(!projectileList.get(i).isActive) {
+        projectileList.remove(i);
+        projectileCollisionList.remove(i);
       }
     }
+  }
+  
+  void setHitEvent(boolean hitEvent) {
+    this.hitEvent = hitEvent;
   }
 
   boolean isAbleTo(char type) { // 어떤 행동이 가능한지를 검사하는 함수: m(ove) f(ire) s(kill) true 리턴시에 가능, false 일 경우 행동 제한
