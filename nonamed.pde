@@ -1,7 +1,7 @@
 import processing.sound.*; //<>//
 
 Player p1; //<>// //<>//
-SoundFile hitSound; = new SoundFile(this, "hitSound.wav");
+SoundFile hitSound = new SoundFile(this, "hitSound.wav");
 AI AI1;
 
 void setup() {
