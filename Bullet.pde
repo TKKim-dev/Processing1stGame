@@ -3,26 +3,26 @@ class Bullet {  // 누구 총알인지는 상관 없고 그냥 이동 & 그래�
   float bulletWidth;
   float bulletHeight;
   int weaponType;
-  color bColor;            // 총알 색상
+  color bulletColor;            // 총알 색상
   boolean isActive;
   CollisionShape bulletCollisionShape;
 
-  Bullet(PVector location, PVector velocity, int wType) {  // 총알 생성 위치, 총알 방향 속도, 누가쏘는건지, 무기 타입
+  Bullet(PVector location, PVector velocity, int wType, color bColor) {  // 총알 생성 위치, 총알 방향 속도, 누가쏘는건지, 무기 타입
     this.location = location;
     this.velocity = velocity; 
     velocity.normalize(); 
-    velocity.mult(25); // 이 부분에서 총알 속도 조절
+    velocity.mult(15); // 이 부분에서 총알 속도 조절
     bulletWidth = 60;
     bulletHeight = 5;
     this.weaponType = wType;
     this.isActive = true;
     this.bulletCollisionShape = new CollisionShape('R', location, velocity, bulletWidth, bulletHeight);
-    bColor=color(0, 0, 200); // 나중에 수정! 색은 나중에 다시 변경
+    this.bulletColor = bColor; // 나중에 수정! 색은 나중에 다시 변경
   }
 
   void display() {
     if (isActive == true) {
-      fill(bColor);
+      fill(bulletColor);
       pushMatrix();
       translate(location.x, location.y);
       rotate(velocity.heading());
