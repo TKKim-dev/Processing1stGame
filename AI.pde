@@ -1,10 +1,9 @@
 class AI {
-  //PVector location, velocity, pvelocity; // 좌표, 그리고 이동에 관련된 벡터들
+  float HP; // AI의 체력
   float movSpeed; // 플레이어의 이동 속도, movSpeed=x은 플레이어가 x pixels per frame 의 속도로 이동함을 뜻함
   float fireSpeed; // 플레이어의 발사 속도. 나중에 공격 속도를 올릴 때는 이 변수를 바꾸면 된다.
   float radius; // 플레이어 개체의 크기
   float movDistance; // 이동 시에 사용되는 변수. 이동이 얼마나 남았는지.
-  float HP; // AI의 체력
   float randTimer;
   float randProjectileTimer;
   ArrayList<CollisionShape> collisionList = new ArrayList<CollisionShape>();
@@ -12,18 +11,22 @@ class AI {
   PVector velocity = new PVector(0, 0);
   PVector pvelocity = new PVector(0, 0);
   ArrayList<Projectile> projectileList = new ArrayList<Projectile>();
-  ArrayList<CollisionShape> projectileCollisionList = new ArrayList<CollisionShape>();
+  ArrayList<CollisionShape> projectileCollisionList = new ArrayList<CollisionShape>();  // AI의 총알 충돌 영역
   PVector projectileLocation, projectileVelocity; // AI가 플레이어에게 총알을 발사함
   CollisionShape collisionShape;
   boolean hitEvent;
+  boolean isActive;
   
   AI() {
+    HP = 100;
+    location.set(random(width - 200, width), random(height - 200, height));
     movSpeed = 2;
     radius=30;
     randTimer=0;
     randProjectileTimer=0;
     collisionShape = new CollisionShape('R', location, velocity, radius, radius);
     collisionList.add(collisionShape);
+    isActive = true;
   }
 
   void display() {
@@ -40,6 +43,7 @@ class AI {
     popMatrix();
     stroke(225, 111, 0, 100);
     line(location.x, location.y, pvelocity.x, pvelocity.y);
+    text(int(HP), location.x - 10, location.y - 30);
   }
   
   void randomize() {
@@ -78,6 +82,9 @@ class AI {
         projectileCollisionList.remove(i);
       }
     }
+    if(HP <= 0) {
+      isActive = false;
+    }
   }
 
   void run() {
@@ -88,5 +95,6 @@ class AI {
   
   void setHitEvent(boolean hitEvent) {
     this.hitEvent = hitEvent;
+    HP -= 7.5;
   }
 }

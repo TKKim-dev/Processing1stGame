@@ -25,11 +25,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.5305008"
-     inkscape:cx="-383.50979"
-     inkscape:cy="1234.9469"
+     inkscape:zoom="1.5"
+     inkscape:cx="30.824079"
+     inkscape:cy="1089.8511"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g4545"
      showgrid="false"
      inkscape:window-width="1366"
      inkscape:window-height="746"
@@ -54,85 +54,117 @@
      id="layer1">
     <g
        id="g4545"
-       transform="matrix(0.26458333,0,0,0.26458333,-69.321849,73.018464)">
+       transform="matrix(0.44512751,0,0,0.42920098,-58.245462,144.50956)"
+       style="fill:#2b19ff;fill-opacity:0.64563108">
       <g
          id="g4488"
-         transform="translate(354.28572,-434.28572)">
+         transform="matrix(0.06811291,0,0,0.07576416,137.18801,-348.42006)"
+         style="fill:#2b19ff;fill-opacity:0.64563108">
         <g
-           id="chevron-right">
+           id="chevron-right"
+           style="fill:#2b19ff;fill-opacity:0.64563108">
           <polygon
              id="polygon4485"
-             points="247.35,153 94.35,0 58.65,35.7 175.95,153 58.65,270.3 94.35,306 " />
+             points="94.35,306 247.35,153 94.35,0 58.65,35.7 175.95,153 58.65,270.3 "
+             style="fill:#2b19ff;fill-opacity:0.64563108" />
         </g>
       </g>
       <g
-         id="g4490" />
+         id="g4490"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4492" />
+         id="g4492"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4494" />
+         id="g4494"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4496" />
+         id="g4496"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4498" />
+         id="g4498"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4500" />
+         id="g4500"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4502" />
+         id="g4502"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4504" />
+         id="g4504"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4506" />
+         id="g4506"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4508" />
+         id="g4508"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4510" />
+         id="g4510"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4512" />
+         id="g4512"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4514" />
+         id="g4514"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4516" />
+         id="g4516"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
-         id="g4518" />
+         id="g4518"
+         style="fill:#2b19ff;fill-opacity:0.64563108" />
       <g
          id="g4488-3"
-         transform="matrix(0.72745855,0,0,0.81325864,262.55599,-402.85714)">
+         transform="matrix(0.7098458,0,0,1.0171957,294.78145,-393.34198)"
+         style="fill:#2b19ff;fill-opacity:0.64563108">
         <g
-           id="chevron-right-5">
+           id="chevron-right-5"
+           style="fill:#2b19ff;fill-opacity:0.64563108"
+           transform="matrix(0.06980293,0,0,0.06057424,-230.81268,46.503425)">
           <polygon
              id="polygon4485-7"
-             points="247.35,153 94.35,0 58.65,35.7 175.95,153 58.65,270.3 94.35,306 " />
+             points="94.35,306 247.35,153 94.35,0 58.65,35.7 175.95,153 58.65,270.3 "
+             style="fill:#2b19ff;fill-opacity:0.64563108" />
         </g>
       </g>
       <g
          id="g4488-3-9"
-         transform="matrix(0.72745855,0,0,0.72922503,135.12741,-386.57141)">
+         transform="matrix(0.04954932,0,0,0.05524912,122.2605,-344.80502)"
+         style="fill:#2b19ff;fill-opacity:0.64563108">
         <g
-           id="chevron-right-5-2">
+           id="chevron-right-5-2"
+           style="fill:#2b19ff;fill-opacity:0.64563108">
           <polygon
              id="polygon4485-7-7"
-             points="58.65,35.7 175.95,153 58.65,270.3 94.35,306 247.35,153 94.35,0 " />
+             points="94.35,0 58.65,35.7 175.95,153 58.65,270.3 94.35,306 247.35,153 "
+             style="fill:#2b19ff;fill-opacity:0.64563108" />
         </g>
       </g>
       <g
          id="g4488-3-9-7"
-         transform="matrix(0.72745855,0,0,0.72922503,16.270264,-385.42857)">
+         transform="matrix(0.04954932,0,0,0.05524912,114.1648,-344.71844)"
+         style="fill:#2b19ff;fill-opacity:0.64563108">
         <g
-           id="chevron-right-5-2-7">
+           id="chevron-right-5-2-7"
+           style="fill:#2b19ff;fill-opacity:0.64563108">
           <polygon
              id="polygon4485-7-7-3"
-             points="58.65,35.7 175.95,153 58.65,270.3 94.35,306 247.35,153 94.35,0 " />
+             points="94.35,0 58.65,35.7 175.95,153 58.65,270.3 94.35,306 247.35,153 "
+             style="fill:#2b19ff;fill-opacity:0.64563108" />
         </g>
       </g>
       <g
          id="g4488-3-9-7-5"
-         transform="matrix(0.72745855,0,0,0.72922503,-104.01545,-382.28571)">
+         transform="matrix(0.04954932,0,0,0.05524912,105.97179,-344.48032)"
+         style="fill:#2b19ff;fill-opacity:0.64563108">
         <g
-           id="chevron-right-5-2-7-5">
+           id="chevron-right-5-2-7-5"
+           style="fill:#2b19ff;fill-opacity:0.64563108">
           <polygon
              id="polygon4485-7-7-3-4"
-             points="94.35,306 247.35,153 94.35,0 58.65,35.7 175.95,153 58.65,270.3 " />
+             points="58.65,270.3 94.35,306 247.35,153 94.35,0 58.65,35.7 175.95,153 "
+             style="fill:#2b19ff;fill-opacity:0.64563108" />
         </g>
       </g>
     </g>

@@ -2,6 +2,7 @@ import processing.sound.*; //<>//
 // 총알 모양 그리고 콜리젼 모양이 60 * 5 모양의 얇은 타원, 사각형 일 때 AI 쪽 총알이 발사되지 않는 에러가 지속적으로 발생함.
 Player p1; //<>// //<>//
 ArrayList<Skill> skillList = new ArrayList<Skill>();
+ArrayList<AI> AIList = new ArrayList<AI>();
 SoundFile hitSound;
 PShape Skill1R; // loadImage()// 1번 스킬의 이미지. 화살표 벡터 이미지 하나만 구해오면 된다!
 AI AI1;
@@ -25,8 +26,17 @@ void settings() {
 void draw() {
   background(255);
   p1.run();
-  AI1.run();
+  for(AI TEMP : AIList) {
+    TEMP.run();
+  }
+  for(int i=0; i < AIList.size(); i++) {
+    if(!AIList.get(i).isActive) {
+      AIList.remove(i);
+    }
+  }  
   text(p1.distanceLeft, p1.location.x-20, p1.location.y-30);
+  text(frameRate, width - 20, height - 30);
+  text("Prese SPACE to Add random AI with 100 HP", width /2 - 50, 30);
   displayProjectiles();
   updateProjectiles();
   if(p1.CCFrameCount > 0) {
@@ -43,30 +53,37 @@ public void displayProjectiles() {
   {
     temp.display();
   }
-  for (Projectile temp : AI1.projectileList)
+  for(AI AITemp : AIList)
   {
-    temp.display();
+    for (Projectile temp : AITemp.projectileList)
+    {
+      temp.display();
+    }
   }
 }
 public void updateProjectiles() {
   for (Projectile temp : p1.projectileList)
   {
     temp.update();
-    if(calculateCollision(AI1.collisionShape,temp.projectileCollisionShape)) {  // projectile 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
-      temp.deactivate();
-      AI1.setHitEvent(true);
-      hitSound.play();
-      text("!!!", AI1.location.x - 5, AI1.location.y - 30);
+    for(AI AITemp : AIList) {
+      if(calculateCollision(AITemp.collisionShape,temp.projectileCollisionShape)) {  // projectile 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
+        temp.deactivate();
+        AITemp.setHitEvent(true);
+        hitSound.play();
+        text("!!!", AITemp.location.x - 5, AITemp.location.y - 30);
+      }
     }
   }
   
-  for (Projectile temp : AI1.projectileList)
+  for (AI AITemp : AIList)
   {
-    temp.update();
-    if(calculateCollision(p1.collisionShape,temp.projectileCollisionShape)) {  // projectile 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
-      temp.deactivate();
-      p1.setHitEvent(true);
-      text("!!!", p1.location.x - 5, p1.location.y - 30);
+    for(Projectile PTemp : AITemp.projectileList) {
+      PTemp.update();
+      if(calculateCollision(p1.collisionShape,PTemp.projectileCollisionShape)) {  // projectile 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
+        PTemp.deactivate();
+        p1.setHitEvent(true);
+        text("!!!", p1.location.x - 5, p1.location.y - 30);
+      }
     }    
   }  
 }
@@ -150,6 +167,14 @@ public void mousePressed() {
 
 public void keyPressed() {
   if(keyCode == SHIFT) {
-    skillList.get(0).setActiveOnReady(true);  // 만약 이미 activeonready 상태라면 isActive 를 false 로
+    if(skillList.get(0).isActiveOnReady) {  // 이미 On 되어있을 때 한번 더 누르면 스킬 취소
+      skillList.get(0).setActiveOnReady(false);
+    } else {    
+      skillList.get(0).setActiveOnReady(true);  // 만약 이미 activeonready 상태라면 isActive 를 false 로
+    }
+  }
+  if(keyCode == ' ') {
+    AI temp = new AI();
+    AIList.add(temp);
   }
 }

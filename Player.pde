@@ -68,7 +68,7 @@ class Player {
     noStroke();
     fill(0);
     if(hitEvent) {
-      fill(255,0,0);
+      fill(255,255,255,0);
       setHitEvent(false);
     }    
     pushMatrix();
@@ -90,8 +90,7 @@ class Player {
         pushMatrix();
         translate(location.x, location.y);
         rotate(skillDirection.heading());
-        fill(0, 0, 255, 80);
-        shape(temp.shapeOnReady, 50, 0, 60, 60);
+        shape(temp.shapeOnReady, 50, 0);
         popMatrix();
       }
     }
