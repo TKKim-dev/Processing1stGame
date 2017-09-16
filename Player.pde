@@ -25,7 +25,7 @@ class Player {
     fireSpeed=2;
     radius=30;
     location = new PVector(x, y);
-    velocity = new PVector(0, 0);
+    velocity = new PVector(1, 1);
     pVelocity = new PVector(0, 0);
     skillDirection = new PVector(0, 0); 
     CCFrameCount=0;
@@ -54,8 +54,8 @@ class Player {
     case 1:
       if (isAbleTo('f') == true) {
         projectileLocation=new PVector(location.x, location.y);
-        projectileVelocity=new PVector(mouseX-location.x, mouseY-location.y);   
-        Projectile temp = new Projectile(projectileLocation, projectileVelocity, color(0,0,255), 80, 10, 45);
+        projectileVelocity=new PVector(worldCamera.pos.x + mouseX-location.x, worldCamera.pos.y + mouseY-location.y);   
+        Projectile temp = new Projectile(projectileLocation, projectileVelocity, color(0,0,255), 60, 6, 35);
         projectileList.add(temp);
         projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
         weaponCooltime = 20;  //  무기 쿨타임
@@ -86,11 +86,11 @@ class Player {
     }
     for(Skill temp : skillList) {
       if(temp.isActiveOnReady) {
-        skillDirection.set(mouseX - location.x, mouseY - location.y);
+        skillDirection.set(worldCamera.pos.x + mouseX - location.x, worldCamera.pos.y + mouseY - location.y);
         pushMatrix();
         translate(location.x, location.y);
         rotate(skillDirection.heading());
-        shape(temp.shapeOnReady, 50, 0);
+        shape(temp.shapeOnReady, 0, 0);
         popMatrix();
       }
     }
@@ -153,12 +153,13 @@ class Player {
           return false;
         }
       }
-      if (weaponCooltime <= 0 && isSkillActive()==false) {
+      if (weaponCooltime <= 0) { 
         return true;
       }
       break;
     case 's':
-      break;
+      return true;
+      //break;
     }
     return false;
   }
@@ -168,13 +169,6 @@ class Player {
       return true;
     }
     return false;
-  }
-
-  boolean isSkillActive() { // 액티브 스킬 사용 시, 혹은 사용 중에 클릭으로 기본 공격이 나가면 안되니까~~
-    if (true) {
-      return false;
-    }
-    return true; // 스킬 사용 시에 여기에 조건 추가하기.
   }
 }
 

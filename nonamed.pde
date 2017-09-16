@@ -5,24 +5,35 @@ ArrayList<Skill> skillList = new ArrayList<Skill>();
 ArrayList<AI> AIList = new ArrayList<AI>();
 SoundFile hitSound;
 PShape Skill1R;
+Camera worldCamera;
+float mapWidth, mapHeight; // 나중에 Load 할 맵의 크기. 우선 1600 1200 짜리 맵 써보기
+PImage background;
 
 void setup() {
+  mapWidth = 1600;
+  mapHeight = 1200;
   smooth();
   frameRate(75);
-  background(255);
   rectMode(CENTER);
-  p1=new Player(1, 200, 200); // 200은 initail location
+  p1=new Player(1, 800, 600); // 200은 initail location
   hitSound = new SoundFile(this, "hitSound.wav");
+  background = loadImage("background.jpg");
   Skill1R = loadShape("1R.svg");
   addPlayerSkill(new Skill(1,Skill1R)); // 여기의 SKill1R 은 몇번째 스킬인지랑은 상관 없음! 처음에 무슨 스킬을 고르는지에 따라 여기서 갈리게 됨. (혹은 무슨 직업을 고르는지에 따라)  
+  worldCamera = new Camera();
 }
 
 void settings() {
   fullScreen();
+  //size(800, 600);
 }
 
 void draw() {
-  background(255);
+  
+  pushMatrix();
+  translate(-worldCamera.pos.x, -worldCamera.pos.y);
+  worldCamera.draw();
+  image(background, 0, 0);
   p1.run();
   for(AI TEMP : AIList) {
     TEMP.run();
@@ -31,16 +42,16 @@ void draw() {
     if(!AIList.get(i).isActive) {
       AIList.remove(i);
     }
-  }  
+  }
   text(p1.distanceLeft, p1.location.x-20, p1.location.y-30);
   text(frameRate, width - 20, height - 30);
-  text("Prese SPACE to Add random AI with 100 HP", width /2 - 50, 30);
+  text("Prese SPACE to Add random AI with 100 HP", mapWidth /2 - 140, mapHeight / 2 - 130);
   displayProjectiles();
   updateProjectiles();
   if(p1.CCFrameCount > 0) {
     text(int(p1.CCFrameCount), p1.location.x, p1.location.y + 30);
   }
-  //mousePressed();
+  popMatrix();
 }
 
 public void addPlayerSkill(Skill skill) {   // 네트워크 게임이므로, 다른 이들의 스킬까지 관리할 필요는 없음. 그건 그냥 투사체의 형식으로 관리하면 된다.
@@ -77,7 +88,7 @@ public void updateProjectiles() {
   {
     for(Projectile PTemp : AITemp.projectileList) {
       PTemp.update();
-      if(calculateCollision(p1.collisionShape,PTemp.projectileCollisionShape)) {  // projectile 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
+      if(calculateCollision(PTemp.projectileCollisionShape, p1.collisionShape)) {  // projectile 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
         PTemp.deactivate();
         p1.setHitEvent(true);
         text("!!!", p1.location.x - 5, p1.location.y - 30);
@@ -104,9 +115,9 @@ boolean calculateCollision(CollisionShape objectA, CollisionShape objectB) { // 
     }
   }
   if(objectA.shapeType == 'R' && objectB.shapeType == 'R') { // 둘 다 rectangle인 경우의 연산
-    for(PVector temp : coordinatesB) {
-       float horValue = (temp.x - objectA.location.x) * objectA.direction.x - (temp.y - objectA.location.y) * objectA.direction.y;
-       float verValue = (temp.x - objectA.location.x) * objectA.direction.y + (temp.y - objectA.location.y) * objectA.direction.x;
+    for(PVector temp : coordinatesB) { 
+       float horValue = (temp.x - objectA.location.x) * objectA.direction.x + (temp.y - objectA.location.y) * objectA.direction.y;
+       float verValue = (temp.y - objectA.location.y) * objectA.direction.x - (temp.x - objectA.location.x) * objectA.direction.y;
        if(horValue < 0) {
          horValue *= -1;
        } 
@@ -114,12 +125,12 @@ boolean calculateCollision(CollisionShape objectA, CollisionShape objectB) { // 
          verValue *= -1;
        }
        if(horValue < objectA.shapeWidth/2 && verValue < objectA.shapeHeight/2) {  // 충돌 감지!
-         return true;
+         return true; //<>//
        }
      }
      for(PVector temp : coordinatesA) {
-       float horValue = (temp.x - objectB.location.x) * objectB.direction.x - (temp.y - objectB.location.y) * objectB.direction.y;
-       float verValue = (temp.x - objectB.location.x) * objectB.direction.y + (temp.y - objectB.location.y) * objectB.direction.x;
+       float horValue = (temp.x - objectB.location.x) * objectB.direction.x + (temp.y - objectB.location.y) * objectB.direction.y;
+       float verValue = (temp.y - objectB.location.y) * objectB.direction.x - (temp.x - objectB.location.x) * objectB.direction.y;
        if(horValue < 0) {
          horValue *= -1;
        } 
@@ -156,16 +167,23 @@ boolean calculateCollision(CollisionShape objectA, CollisionShape objectB) { // 
 
 public void mousePressed() {
   if (mouseButton == LEFT) {
-    p1.fireEvent(1);  // 만약 skillOnReady 가 active 라면 그걸 사용함
+    for(Skill temp : skillList) {
+      if(temp.isActiveOnReady) {
+        temp.setActiveOnUse(true);
+        temp.setActiveOnReady(false);
+        break;
+      }
+      p1.fireEvent(1); // 일반적인 총알 발사!
+    }
   }
   if (mouseButton == RIGHT) {
-    p1.move(mouseX, mouseY); // 만약 skillOnReady 가 active 라면.. 그대로 두기!
+    p1.move(worldCamera.pos.x + mouseX, worldCamera.pos.y + mouseY); // 만약 skillOnReady 가 active 라면.. 그대로 두기!
   }
 }
 
 public void keyPressed() {
   if(keyCode == SHIFT) {
-    if(skillList.get(0).isActiveOnReady && p1.isAbleTo('S') /*여기에 스킬 쿨타임 관련 조건 넣기*/) {  // 이미 On 되어있을 때 한번 더 누르면 스킬 취소
+    if(skillList.get(0).isActiveOnReady && p1.isAbleTo('s') /*여기에 스킬 쿨타임 관련 조건 넣기*/) {  // 이미 On 되어있을 때 한번 더 누르면 스킬 취소
       
       skillList.get(0).setActiveOnReady(false);
     } else {    
@@ -178,5 +196,8 @@ public void keyPressed() {
   if(keyCode == ' ') {
     AI temp = new AI();
     AIList.add(temp);
+  }
+  if(keyCode == LEFT) {
+    surface.setLocation(400, 400);
   }
 }

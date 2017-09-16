@@ -8,7 +8,7 @@ class AI {
   float randProjectileTimer;
   ArrayList<CollisionShape> collisionList = new ArrayList<CollisionShape>();
   PVector location = new PVector(random(0, width), random(0, height));
-  PVector velocity = new PVector(0, 0);
+  PVector velocity = new PVector(3, 3);
   PVector pvelocity = new PVector(0, 0);
   ArrayList<Projectile> projectileList = new ArrayList<Projectile>();
   ArrayList<CollisionShape> projectileCollisionList = new ArrayList<CollisionShape>();  // AI의 총알 충돌 영역
@@ -19,7 +19,7 @@ class AI {
   
   AI() {
     HP = 100;
-    location.set(random(width - 200, width), random(height - 200, height));
+    location.set(random(mapWidth - 200, mapWidth), random(mapHeight - 200, mapHeight));
     movSpeed = 2;
     radius=30;
     randTimer=0;
@@ -48,7 +48,7 @@ class AI {
   
   void randomize() {
     if (randTimer == 0) {
-      velocity=new PVector(random(0, width), random(0, height));
+      velocity=new PVector(random(0, mapWidth), random(0, mapHeight));
       pvelocity.set(velocity);            // b.set(a): b 벡터를 a 벡터와 같은 내용으로 초기화
       velocity.sub(location);            // sub(): 벡터의 빼기 연산. 원래의 velocity 벡터는 단순히 mouseX,mouseY 만을 가지므로, 처음 위치에서 빼줄 필요가 있음
       movDistance = velocity.mag();      // mag(): 벡터의 크기를 구하는 연산(즉 총 이동 거리를 구함)
@@ -57,7 +57,7 @@ class AI {
     }
   }
 
-  void update() {                               // AI의 
+  void update() { 
     if (movDistance > 0.2) {
       location.add(velocity.x*movSpeed, velocity.y*movSpeed);
       for(CollisionShape temp : collisionList) {
@@ -68,14 +68,14 @@ class AI {
     if(randProjectileTimer < 0) {
       projectileLocation = new PVector(location.x, location.y);
       projectileVelocity = new PVector(p1.location.x - location.x, p1.location.y - location.y);
-      Projectile temp = new Projectile(projectileLocation, projectileVelocity, color(255,0,0), 60, 5, 5);
+      Projectile temp = new Projectile(projectileLocation, projectileVelocity, color(255,0,0), 60, 5, 7);
       projectileList.add(temp);
-      projectileCollisionList.add(new CollisionShape('C', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
-      randProjectileTimer=75;
+      projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
+      randProjectileTimer=150;
     }
     randTimer--;
     randProjectileTimer--;
-    
+
     for(int i=0; i<projectileList.size(); i++) {  // 총알 삭제 파트
       if(!projectileList.get(i).isActive) {
         projectileList.remove(i);

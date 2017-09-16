@@ -26,10 +26,7 @@ class Skill {  // 각각의 스킬들을 우선 선언하고 skillList 리스트
   }
   void lowerSkillCooltime(float amountTime) {   // 얼마만큼 해당 스킬 쿨타임을 감소시키는 method
     cooltime -= amountTime;
-  }
-  
-  
-  
+  } 
 }
 
 //   ※ 구현해야 할 것 ※

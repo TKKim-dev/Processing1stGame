@@ -14,7 +14,7 @@ class Projectile { // 이건 총알 뿐만이 아니라 각종 투사체를 모�
     this.projectileWidth = projectileWidth;
     this.projectileHeight = projectileHeight;
     this.isActive = true;
-    this.projectileCollisionShape = new CollisionShape('C', location, velocity, projectileWidth, projectileHeight);
+    this.projectileCollisionShape = new CollisionShape('R', location, velocity, projectileWidth, projectileHeight);
     this.projectileColor = pColor; // 나중에 수정! 색은 나중에 다시 변경
   }
 
@@ -24,7 +24,7 @@ class Projectile { // 이건 총알 뿐만이 아니라 각종 투사체를 모�
       pushMatrix();
       translate(location.x, location.y);
       rotate(velocity.heading());
-      ellipse(0, 0, projectileWidth, projectileHeight);
+      rect(0, 0, projectileWidth, projectileHeight);
       popMatrix();
     }
   }
@@ -34,7 +34,7 @@ class Projectile { // 이건 총알 뿐만이 아니라 각종 투사체를 모�
       location.add(velocity);                  // 총알의 움직임을 담당하는 부분
       projectileCollisionShape.update(location, velocity);
     }
-    if (location.x < 0 || location.x > width || location.y < 0 || location.y > height) {
+    if (location.x < 0 || location.x > mapWidth || location.y < 0 || location.y > mapHeight) {
       deactivate();
     }
   }
