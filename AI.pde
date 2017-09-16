@@ -64,10 +64,10 @@ class AI {
     if(randProjectileTimer < 0) {
       projectileLocation = new PVector(location.x, location.y);
       projectileVelocity = new PVector(p1.location.x - location.x, p1.location.y - location.y);
-      Projectile temp = new Projectile(projectileLocation, projectileVelocity, 0,  color(255,0,0));
+      Projectile temp = new Projectile(projectileLocation, projectileVelocity, color(255,0,0), 60, 5, 5);
       projectileList.add(temp);
       projectileCollisionList.add(new CollisionShape('C', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
-      randProjectileTimer=100;
+      randProjectileTimer=75;
     }
     randTimer--;
     randProjectileTimer--;

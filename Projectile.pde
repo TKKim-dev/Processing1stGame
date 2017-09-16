@@ -2,19 +2,17 @@ class Projectile { // 이건 총알 뿐만이 아니라 각종 투사체를 모�
   PVector location, velocity;
   float projectileWidth;
   float projectileHeight;
-  int weaponType;
   color projectileColor;
   boolean isActive;
   CollisionShape projectileCollisionShape;
 
-  Projectile(PVector location, PVector velocity, int wType, color pColor) {  // 총알 생성 위치, 총알 방향 속도, 누가쏘는건지, 무기 타입
+  Projectile(PVector location, PVector velocity, color pColor, float projectileWidth, float projectileHeight, float projectileSpeed) {  // 총알 생성 위치, 총알 방향 속도, 누가쏘는건지, 무기 타입
     this.location = /*location;*/new PVector(location.x, location.y);   
     this.velocity = /*velocity;*/new PVector(velocity.x, velocity.y);
     this.velocity.normalize(); 
-    this.velocity.mult(25); // 이 부분에서 총알 속도 조절
-    projectileWidth = 60;
-    projectileHeight = 60;
-    this.weaponType = wType;
+    this.velocity.mult(projectileSpeed); // 이 부분에서 총알 속도 조절
+    this.projectileWidth = projectileWidth;
+    this.projectileHeight = projectileHeight;
     this.isActive = true;
     this.projectileCollisionShape = new CollisionShape('C', location, velocity, projectileWidth, projectileHeight);
     this.projectileColor = pColor; // 나중에 수정! 색은 나중에 다시 변경
@@ -37,11 +35,11 @@ class Projectile { // 이건 총알 뿐만이 아니라 각종 투사체를 모�
       projectileCollisionShape.update(location, velocity);
     }
     if (location.x < 0 || location.x > width || location.y < 0 || location.y > height) {
-      deactivateProjectile();
+      deactivate();
     }
   }
   
-  void deactivateProjectile() {
+  void deactivate() {
     isActive = false;
   }
 }

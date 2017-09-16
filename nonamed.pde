@@ -19,18 +19,20 @@ void setup() {
 }
 
 void settings() {
-//  fullScreen();
-  size(800,800);
+  fullScreen();
 }
 
 void draw() {
   background(255);
   p1.run();
   AI1.run();
-  text(frameRate, width - 40, height - 30);
+  text(p1.distanceLeft, p1.location.x-20, p1.location.y-30);
   displayProjectiles();
   updateProjectiles();
-  //shape(Skill1R, 0, 0, 70, 70);
+  if(p1.CCFrameCount > 0) {
+    text(int(p1.CCFrameCount), p1.location.x, p1.location.y + 30);
+  }
+  mousePressed();
 }
 
 public void addPlayerSkill(Skill skill) {   // 네트워크 게임이므로, 다른 이들의 스킬까지 관리할 필요는 없음. 그건 그냥 투사체의 형식으로 관리하면 된다.
@@ -51,7 +53,7 @@ public void updateProjectiles() {
   {
     temp.update();
     if(calculateCollision(AI1.collisionShape,temp.projectileCollisionShape)) {  // projectile 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
-      temp.deactivateProjectile();
+      temp.deactivate();
       AI1.setHitEvent(true);
       hitSound.play();
       text("!!!", AI1.location.x - 5, AI1.location.y - 30);
@@ -62,7 +64,7 @@ public void updateProjectiles() {
   {
     temp.update();
     if(calculateCollision(p1.collisionShape,temp.projectileCollisionShape)) {  // projectile 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
-      temp.deactivateProjectile();
+      temp.deactivate();
       p1.setHitEvent(true);
       text("!!!", p1.location.x - 5, p1.location.y - 30);
     }    
@@ -137,8 +139,17 @@ boolean calculateCollision(CollisionShape objectA, CollisionShape objectB) { // 
     return false;
 }
 
+public void mousePressed() {
+  if (mouseButton == LEFT) {
+    p1.fireEvent(1);  // 만약 skillOnReady 가 active 라면 그걸 사용함
+  }
+  if (mouseButton == RIGHT) {
+    p1.move(mouseX, mouseY); // 만약 skillOnReady 가 active 라면.. 그대로 두기!
+  }
+}
+
 public void keyPressed() {
   if(keyCode == SHIFT) {
-    skillList.get(0).setActiveOnReady(true);
+    skillList.get(0).setActiveOnReady(true);  // 만약 이미 activeonready 상태라면 isActive 를 false 로
   }
 }

@@ -21,7 +21,7 @@ class Player {
 
   Player(int playerNum, float x, float y) {
     this.playerNum=playerNum; // 몇번째 플레이어인지 미리 input
-    moveSpeed=2;
+    moveSpeed=3;
     fireSpeed=2;
     radius=30;
     location = new PVector(x, y);
@@ -35,41 +35,31 @@ class Player {
   }
 
   void run() {
-    mouseEvent();
     display();
-    move();
+    update();
     updateCount();
     manageProjectiles();
   }
   
-  void mouseEvent() { // 마우스 이벤트는 메시지 전달만. CC 체크는 X
-    if (mousePressed) {  
-      if (mouseButton == RIGHT) {
-        velocity=new PVector(mouseX, mouseY);
+  void move(float destinationX,float destinationY) { 
+        velocity=new PVector(destinationX, destinationY);
         pVelocity.set(velocity);            // b.set(a): b 벡터를 a 벡터와 같은 내용으로 초기화
         velocity.sub(location);            // sub(): 벡터의 빼기 연산. 원래의 velocity 벡터는 단순히 mouseX,mouseY 만을 가지므로, 처음 위치에서 빼줄 필요가 있음
         distanceLeft = velocity.mag();      // mag(): 벡터의 크기를 구하는 연산(즉 총 이동 거리를 구함)
         velocity.normalize();               // normalize 는 해당 벡터의 크기를 1로 만드는 효과임. 즉 (cosθ,sinθ)가 되어 자동으로 방향을 나타내게 됨
-      }
-      if (mouseButton == LEFT) {
-        if (isAbleTo('f') == true) {
-          projectileLocation=new PVector(location.x, location.y);
-          projectileVelocity=new PVector(mouseX-location.x, mouseY-location.y);
-          fireEvent(1); // 일반적인 공격(공격 가능 상태에서 클릭을 통해 공격), 0 일때 공격제한, 혹은 여러 갈래로 발사하거나, 난사 스킬처럼 쏘는 경우 또 다른 숫자 넣어두기.
-        }
-      }
-    }
   }
   
   void fireEvent(int type) { // 파이어 이벤트는 발사 방향 & 플레이어 타입, 웨폰타입 전달
     switch(type) {
-    case 0:
-      break;
     case 1:
-      Projectile temp = new Projectile(projectileLocation, projectileVelocity, weaponType, color(0,0,255));
-      projectileList.add(temp);
-      projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
-      weaponCooltime = 20;  //  무기 쿨타임
+      if (isAbleTo('f') == true) {
+        projectileLocation=new PVector(location.x, location.y);
+        projectileVelocity=new PVector(mouseX-location.x, mouseY-location.y);   
+        Projectile temp = new Projectile(projectileLocation, projectileVelocity, color(0,0,255), 80, 10, 45);
+        projectileList.add(temp);
+        projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
+        weaponCooltime = 20;  //  무기 쿨타임
+      }
       break;
     }
   }
@@ -86,9 +76,12 @@ class Player {
     rotate(velocity.heading());
     rect(0, 0, radius, radius);
     popMatrix();
-    if (isMoving()) {
+    if (distanceLeft > 0) {
       strokeWeight(2);
       stroke(30, 100, 255, 80);
+      if(!isMoving()) {
+        stroke(225, 155, 0, 80);
+      }
       line(location.x, location.y, pVelocity.x, pVelocity.y);
     }
     for(Skill temp : skillList) {
@@ -104,9 +97,14 @@ class Player {
     }
   }
 
-  void move() {                               //플레이어의 다양한 정보 업데이트. 체력 상태, CC상태 등등
+  void update() {                               //플레이어의 다양한 정보 업데이트. 체력 상태, CC상태 등등
     if (isAbleTo('m')==true && distanceLeft>0) {
       location.add(velocity.x*moveSpeed, velocity.y*moveSpeed);
+    }
+    
+    if(CCFrameCount <= 0) {
+      CCStatus[0] = 0;
+      CCFrameCount = 0;
     }
   }
 
@@ -116,6 +114,9 @@ class Player {
     }
     if (isMoving()) {
       distanceLeft -= moveSpeed;
+    }
+    if (CCFrameCount > 0) {
+      CCFrameCount--;
     }
     //skill_cooltime[] -= ?  나중에 스킬 관련 쿨타임 감소도 구현하기
   }
@@ -134,6 +135,8 @@ class Player {
   
   void setHitEvent(boolean hitEvent) {
     this.hitEvent = hitEvent;
+    CCStatus[0]=10;
+    CCFrameCount = 50;
   }
 
   boolean isAbleTo(char type) { // 어떤 행동이 가능한지를 검사하는 함수: m(ove) f(ire) s(kill) true 리턴시에 가능, false 일 경우 행동 제한
@@ -162,10 +165,9 @@ class Player {
   }
 
   boolean isMoving() {
-    if (isAbleTo('m') && distanceLeft>0.2) { // 움직일 수 있고 움직일 거리가 남았다면 움직이는 것으로 가정. 나중에 프레임 카운트 대신 거리 개념으로~!
+    if (isAbleTo('m') && distanceLeft>0.01) { // 움직일 수 있고 움직일 거리가 남았다면 움직이는 것으로 가정. 나중에 프레임 카운트 대신 거리 개념으로~!
       return true;
     }
-    distanceLeft=0;
     return false;
   }
 
