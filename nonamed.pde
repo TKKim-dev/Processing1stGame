@@ -4,8 +4,7 @@ Player p1; //<>// //<>//
 ArrayList<Skill> skillList = new ArrayList<Skill>();
 ArrayList<AI> AIList = new ArrayList<AI>();
 SoundFile hitSound;
-PShape Skill1R; // loadImage()// 1번 스킬의 이미지. 화살표 벡터 이미지 하나만 구해오면 된다!
-AI AI1;
+PShape Skill1R;
 
 void setup() {
   smooth();
@@ -13,7 +12,6 @@ void setup() {
   background(255);
   rectMode(CENTER);
   p1=new Player(1, 200, 200); // 200은 initail location
-  AI1=new AI();
   hitSound = new SoundFile(this, "hitSound.wav");
   Skill1R = loadShape("1R.svg");
   addPlayerSkill(new Skill(1,Skill1R)); // 여기의 SKill1R 은 몇번째 스킬인지랑은 상관 없음! 처음에 무슨 스킬을 고르는지에 따라 여기서 갈리게 됨. (혹은 무슨 직업을 고르는지에 따라)  
@@ -42,7 +40,7 @@ void draw() {
   if(p1.CCFrameCount > 0) {
     text(int(p1.CCFrameCount), p1.location.x, p1.location.y + 30);
   }
-  mousePressed();
+  //mousePressed();
 }
 
 public void addPlayerSkill(Skill skill) {   // 네트워크 게임이므로, 다른 이들의 스킬까지 관리할 필요는 없음. 그건 그냥 투사체의 형식으로 관리하면 된다.
@@ -167,10 +165,14 @@ public void mousePressed() {
 
 public void keyPressed() {
   if(keyCode == SHIFT) {
-    if(skillList.get(0).isActiveOnReady) {  // 이미 On 되어있을 때 한번 더 누르면 스킬 취소
+    if(skillList.get(0).isActiveOnReady && p1.isAbleTo('S') /*여기에 스킬 쿨타임 관련 조건 넣기*/) {  // 이미 On 되어있을 때 한번 더 누르면 스킬 취소
+      
       skillList.get(0).setActiveOnReady(false);
     } else {    
-      skillList.get(0).setActiveOnReady(true);  // 만약 이미 activeonready 상태라면 isActive 를 false 로
+      for(int i = 0; i < skillList.size(); i++) { // 다른 스킬의 OnReady 상태일 때 이 스킬을 사용하면 다른 것들을 false 로 만들고 얘만 true 로 설정함!
+        skillList.get(i).setActiveOnReady(false);
+      }
+      skillList.get(0).setActiveOnReady(true);
     }
   }
   if(keyCode == ' ') {
