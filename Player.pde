@@ -15,21 +15,21 @@ class Player {
   float weaponCooltime; // 다시 발사 가능할때까지 걸리는 시간
   int weaponType;
   CollisionShape collisionShape;
-  Table CCtable = loadTable("CCtable.csv"); // ※아직 구현 안됨※ 미리 정해진 CC 테이블 [CC상태][이동 속도][지속시간(ccframecount)] ex) [0][0] [0][1] [0][2] 순서대로
-  Table WPtable = loadTable("WPtable.csv"); // ※아직 구현 안됨※ [무기 타입] [총알 속도] [무기 쿨타임] [무기 데미지]
+  //Table CCtable = loadTable("CCtable.csv"); // ※아직 구현 안됨※ 미리 정해진 CC 테이블 [CC상태][이동 속도][지속시간(ccframecount)] ex) [0][0] [0][1] [0][2] 순서대로
+  //Table WPtable = loadTable("WPtable.csv"); // ※아직 구현 안됨※ [무기 타입] [총알 속도] [무기 쿨타임] [무기 데미지]
   boolean hitEvent;
 
   Player(int playerNum, float x, float y) {
     this.playerNum=playerNum; // 몇번째 플레이어인지 미리 input
-    moveSpeed=3;
-    fireSpeed=2;
-    radius=30;
+    moveSpeed = 3;
+    fireSpeed = 2;
+    radius = 45;
     location = new PVector(x, y);
     velocity = new PVector(1, 1);
     pVelocity = new PVector(0, 0);
     skillDirection = new PVector(0, 0); 
-    CCFrameCount=0;
-    weaponCooltime=0;
+    CCFrameCount = 0;
+    weaponCooltime = 0;
     /*playerCollisionList.add(*/collisionShape = new CollisionShape('R', location, velocity, radius, radius)/*)*/;  // 플레이어의 모양인 네모,
     hitEvent = false;
   }
@@ -55,7 +55,7 @@ class Player {
       if (isAbleTo('f') == true) {
         projectileLocation=new PVector(location.x, location.y);
         projectileVelocity=new PVector(worldCamera.pos.x + mouseX-location.x, worldCamera.pos.y + mouseY-location.y);   
-        Projectile temp = new Projectile(projectileLocation, projectileVelocity, color(0,0,255), 60, 6, 35);
+        Projectile temp = new Projectile(projectileLocation, projectileVelocity, #ffd400, 60, 6, 35);
         projectileList.add(temp);
         projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
         weaponCooltime = 20;  //  무기 쿨타임
@@ -67,16 +67,13 @@ class Player {
   void display() {
     noStroke();
     fill(0);
-    if(hitEvent) {
-      fill(255,255,255,0);
-      setHitEvent(false);
-    }    
     pushMatrix();
     translate(location.x, location.y);
-    rotate(velocity.heading());
-    rect(0, 0, radius, radius);
+    //rotate(velocity.heading());
+    //rect(0, 0, radius, radius);
+    shape(p1Shape, 0, 0);
     popMatrix();
-    if (distanceLeft > 0) {
+    if (distanceLeft > 0.1) {
       strokeWeight(2);
       stroke(30, 100, 255, 80);
       if(!isMoving()) {
@@ -97,7 +94,7 @@ class Player {
   }
 
   void update() {                               //플레이어의 다양한 정보 업데이트. 체력 상태, CC상태 등등
-    if (isAbleTo('m')==true && distanceLeft>0) {
+    if (isAbleTo('m') == true && distanceLeft > 0.1) {
       location.add(velocity.x*moveSpeed, velocity.y*moveSpeed);
     }
     

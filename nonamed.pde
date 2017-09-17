@@ -1,10 +1,10 @@
 import processing.sound.*; //<>//
-// 총알 모양 그리고 콜리젼 모양이 60 * 5 모양의 얇은 타원, 사각형 일 때 AI 쪽 총알이 발사되지 않는 에러가 지속적으로 발생함.
-Player p1; //<>// //<>//
+Player p1; //<>//
 ArrayList<Skill> skillList = new ArrayList<Skill>();
 ArrayList<AI> AIList = new ArrayList<AI>();
 SoundFile hitSound;
 PShape Skill1R;
+PShape AIShape, p1Shape;
 Camera worldCamera;
 float mapWidth, mapHeight; // 나중에 Load 할 맵의 크기. 우선 1600 1200 짜리 맵 써보기
 PImage background;
@@ -15,10 +15,12 @@ void setup() {
   smooth();
   frameRate(75);
   rectMode(CENTER);
-  p1=new Player(1, 800, 600); // 200은 initail location
+  p1=new Player(1, 800, 600);
   hitSound = new SoundFile(this, "hitSound.wav");
   background = loadImage("background.jpg");
   Skill1R = loadShape("1R.svg");
+  p1Shape = loadShape("pikachu.svg");
+  AIShape = loadShape("zubat.svg");
   addPlayerSkill(new Skill(1,Skill1R)); // 여기의 SKill1R 은 몇번째 스킬인지랑은 상관 없음! 처음에 무슨 스킬을 고르는지에 따라 여기서 갈리게 됨. (혹은 무슨 직업을 고르는지에 따라)  
   worldCamera = new Camera();
 }
@@ -32,7 +34,7 @@ void draw() {
   
   pushMatrix();
   translate(-worldCamera.pos.x, -worldCamera.pos.y);
-  worldCamera.draw();
+  worldCamera.update();
   image(background, 0, 0);
   p1.run();
   for(AI TEMP : AIList) {
@@ -49,7 +51,8 @@ void draw() {
   displayProjectiles();
   updateProjectiles();
   if(p1.CCFrameCount > 0) {
-    text(int(p1.CCFrameCount), p1.location.x, p1.location.y + 30);
+    fill(255, 0, 0);
+    text(int(p1.CCFrameCount), p1.location.x - 7, p1.location.y + 35);
   }
   popMatrix();
 }
@@ -79,7 +82,6 @@ public void updateProjectiles() {
         temp.deactivate();
         AITemp.setHitEvent(true);
         hitSound.play();
-        text("!!!", AITemp.location.x - 5, AITemp.location.y - 30);
       }
     }
   }
@@ -91,7 +93,6 @@ public void updateProjectiles() {
       if(calculateCollision(PTemp.projectileCollisionShape, p1.collisionShape)) {  // projectile 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
         PTemp.deactivate();
         p1.setHitEvent(true);
-        text("!!!", p1.location.x - 5, p1.location.y - 30);
       }
     }    
   }  
@@ -169,7 +170,7 @@ public void mousePressed() {
   if (mouseButton == LEFT) {
     for(Skill temp : skillList) {
       if(temp.isActiveOnReady) {
-        temp.setActiveOnUse(true);
+        temp.activate(temp.skillNum);
         temp.setActiveOnReady(false);
         break;
       }
@@ -201,3 +202,9 @@ public void keyPressed() {
     surface.setLocation(400, 400);
   }
 }
+
+//  ※ 구현해야 하는 것
+// ※플레이어와 AI에 PShape 로 적당한 이미지 찾아서 넣고, 그에 알맞게 충돌 범위 구현해놓기.
+// ※Shift 스킬 사용 효과 만들기. 플레이어 스킬[0]에 Skill1R 을 할당하는 것.
+// ※
+// ※

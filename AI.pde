@@ -21,9 +21,9 @@ class AI {
     HP = 100;
     location.set(random(mapWidth - 200, mapWidth), random(mapHeight - 200, mapHeight));
     movSpeed = 2;
-    radius=30;
-    randTimer=0;
-    randProjectileTimer=0;
+    radius = 45;
+    randTimer = 0;
+    randProjectileTimer = 0;
     collisionShape = new CollisionShape('R', location, velocity, radius, radius);
     collisionList.add(collisionShape);
     isActive = true;
@@ -38,8 +38,9 @@ class AI {
     }
     pushMatrix();
     translate(location.x, location.y);
-    rotate(velocity.heading());
-    rect(0, 0, radius, radius);
+    //rotate(velocity.heading());
+    //rect(0, 0, radius, radius);
+    shape(AIShape,0,0);
     popMatrix();
     stroke(225, 111, 0, 100);
     line(location.x, location.y, pvelocity.x, pvelocity.y);
@@ -68,7 +69,7 @@ class AI {
     if(randProjectileTimer < 0) {
       projectileLocation = new PVector(location.x, location.y);
       projectileVelocity = new PVector(p1.location.x - location.x, p1.location.y - location.y);
-      Projectile temp = new Projectile(projectileLocation, projectileVelocity, color(255,0,0), 60, 5, 7);
+      Projectile temp = new Projectile(projectileLocation, projectileVelocity, #3662CE, 60, 20, 5);
       projectileList.add(temp);
       projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
       randProjectileTimer=150;
