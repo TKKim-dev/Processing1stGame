@@ -1,9 +1,9 @@
-import processing.sound.*; //<>//
-Player p1; //<>//
+import processing.sound.*; //<>// //<>//
+Player p1; //<>// //<>//
 ArrayList<Skill> skillList = new ArrayList<Skill>();
 ArrayList<AI> AIList = new ArrayList<AI>();
 SoundFile hitSound;
-PShape AIShape, p1Shape;
+PShape AIShape, p1Shape, lightning, AIAttack;
 Camera worldCamera;
 float mapWidth, mapHeight; // 나중에 Load 할 맵의 크기. 우선 1600 1200 짜리 맵 써보기
 PImage background;
@@ -20,8 +20,11 @@ void setup() {
   p1=new Player(800, 600);
   hitSound = new SoundFile(this, "hitSound.wav");
   background = loadImage("background.jpg");
+  background.resize(width, height);
   p1Shape = loadShape("pikachu.svg");
   AIShape = loadShape("zubat.svg");
+  lightning = loadShape("lightning.svg");
+  AIAttack = loadShape("zubat_attack.svg");
   addPlayerSkill(new Skill1()); // 여기의 SKill1R 은 몇번째 스킬인지랑은 상관 없음! 처음에 무슨 스킬을 고르는지에 따라 여기서 갈리게 됨. (혹은 무슨 직업을 고르는지에 따라)  
   worldCamera = new Camera();
 }
@@ -35,7 +38,8 @@ void draw() {
   pushMatrix();
   worldCamera.update();  
   translate(-worldCamera.pos.x, -worldCamera.pos.y);
-  image(background, 0, 0);
+  //image(background, 0, 0);
+  background(255);
   p1.run();
   for(AI TEMP : AIList) {
     TEMP.run();
@@ -48,8 +52,9 @@ void draw() {
   text(p1.distanceLeft, p1.location.x-20, p1.location.y-30);
   text(frameRate, width - 20, height - 30);
   text("Prese A KEY to Add random AI with 100 HP", mapWidth /2 - 140, mapHeight / 2 - 130);
-  displayProjectiles();
+  
   updateProjectiles();
+  displayProjectiles();
   if(p1.CCFrameCount[0] > 0) {
     fill(255, 0, 0);
     text(p1.CCFrameCount[0], p1.location.x - 7, p1.location.y + 35);
@@ -121,7 +126,7 @@ boolean calculateCollision(CollisionShape objectA, CollisionShape objectB) { // 
        float verValue = (temp.y - objectA.location.y) * objectA.direction.x - (temp.x - objectA.location.x) * objectA.direction.y;
        if(horValue < 0) {
          horValue *= -1;
-       } 
+       }  //<>//
        if(verValue < 0) {
          verValue *= -1;
        }
@@ -165,7 +170,7 @@ boolean calculateCollision(CollisionShape objectA, CollisionShape objectB) { // 
     }
     return false;
 }
-
+ //<>//
 public void mousePressed() {
   if (mouseButton == LEFT) {
     for(Skill temp : skillList) {

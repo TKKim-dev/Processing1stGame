@@ -69,9 +69,9 @@ class AI {
     if(randProjectileTimer < 0) {
       projectileLocation = new PVector(location.x, location.y);
       projectileVelocity = new PVector(p1.location.x - location.x, p1.location.y - location.y);
-      Projectile temp = new Projectile(projectileLocation, projectileVelocity, #3662CE, 60, 20, 5);
+      Projectile temp = new Projectile(projectileLocation, projectileVelocity, AIAttack, 40, 40, 5);
       projectileList.add(temp);
-      projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
+      projectileCollisionList.add(new CollisionShape('C', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
       randProjectileTimer=150;
     }
     randTimer--;
