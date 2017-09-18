@@ -12,13 +12,11 @@ class Camera {
     if (mouseY < 100 && pos.y >= 5) pos.y-=5;
     else if (mouseY > height - 100 && pos.y + height <= mapHeight - 5) pos.y+=5;
     
-    //if (keyPressed) {
-    //  if (key == 'w') pos.y -= 5;
+    if (keyPressed) {
+      if (key == ' ') pos.set(p1.location.x - width / 2, p1.location.y - height / 2);
     //  if (key == 's') pos.y += 5;
     //  if (key == 'a') pos.x -= 5;
     //  if (key == 'd') pos.x += 5;
-    }  
-    void reset() {
-    pos.set(p1.location.x - width / 2, p1.location.y - height / 2);  
-    } 
+      }
+    }
 }

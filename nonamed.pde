@@ -7,6 +7,9 @@ PShape AIShape, p1Shape;
 Camera worldCamera;
 float mapWidth, mapHeight; // 나중에 Load 할 맵의 크기. 우선 1600 1200 짜리 맵 써보기
 PImage background;
+float DEFAULT_MOVESPEED = 3;
+float DEFAULT_FIRESPEED = 2;
+float DEFAULT_DAMAGE = 1;
 
 void setup() {
   mapWidth = 1600;
@@ -14,10 +17,9 @@ void setup() {
   smooth();
   frameRate(75);
   rectMode(CENTER);
-  p1=new Player(1, 800, 600);
+  p1=new Player(800, 600);
   hitSound = new SoundFile(this, "hitSound.wav");
   background = loadImage("background.jpg");
-  
   p1Shape = loadShape("pikachu.svg");
   AIShape = loadShape("zubat.svg");
   addPlayerSkill(new Skill1()); // 여기의 SKill1R 은 몇번째 스킬인지랑은 상관 없음! 처음에 무슨 스킬을 고르는지에 따라 여기서 갈리게 됨. (혹은 무슨 직업을 고르는지에 따라)  
@@ -26,16 +28,14 @@ void setup() {
 
 void settings() {
   fullScreen();
-  //size(800, 600);
+  //size(600, 600);
 }
 
 void draw() {
-  
   pushMatrix();
+  worldCamera.update();  
   translate(-worldCamera.pos.x, -worldCamera.pos.y);
-  worldCamera.update();
   image(background, 0, 0);
-  background(255);
   p1.run();
   for(AI TEMP : AIList) {
     TEMP.run();
@@ -50,14 +50,14 @@ void draw() {
   text("Prese A KEY to Add random AI with 100 HP", mapWidth /2 - 140, mapHeight / 2 - 130);
   displayProjectiles();
   updateProjectiles();
-  if(p1.CCFrameCount > 0) {
+  if(p1.CCFrameCount[0] > 0) {
     fill(255, 0, 0);
-    text(int(p1.CCFrameCount), p1.location.x - 7, p1.location.y + 35);
+    text(p1.CCFrameCount[0], p1.location.x - 7, p1.location.y + 35);
   }
   popMatrix();
 }
 
-public void addPlayerSkill(Skill skill) {   // 네트워크 게임이므로, 다른 이들의 스킬까지 관리할 필요는 없음. 그건 그냥 투사체의 형식으로 관리하면 된다.
+public void addPlayerSkill(Skill skill) {
     skillList.add(skill);
 }
 public void displayProjectiles() {
@@ -178,13 +178,13 @@ public void mousePressed() {
     }
   }
   if (mouseButton == RIGHT) {
-    p1.move(worldCamera.pos.x + mouseX, worldCamera.pos.y + mouseY); // 만약 skillOnReady 가 active 라면.. 그대로 두기!
+    if(!p1.disableMove) p1.move(worldCamera.pos.x + mouseX, worldCamera.pos.y + mouseY); // 만약 skillOnReady 가 active 라면.. 그대로 두기!
   }
 }
 
 public void keyPressed() {
   if(keyCode == SHIFT) {
-    if(skillList.get(0).isActiveOnReady && p1.isAbleTo('s') /*여기에 스킬 쿨타임 관련 조건 넣기*/) {  // 이미 On 되어있을 때 한번 더 누르면 스킬 취소
+    if(skillList.get(0).isActiveOnReady && p1.isAbleToSkill) { ///*여기에 스킬 쿨타임 관련 조건 넣기*/) {  // 이미 On 되어있을 때 한번 더 누르면 스킬 취소
       
       skillList.get(0).setActiveOnReady(false);
     } else {    
@@ -197,12 +197,6 @@ public void keyPressed() {
   if(keyCode == 'A') {
     AI temp = new AI();
     AIList.add(temp);
-  }
-  if(keyCode == ' ') {
-    worldCamera.reset();
-  }
-  if(keyCode == LEFT) {
-    surface.setLocation(400, 400);
   }
 }
 

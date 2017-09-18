@@ -19,8 +19,12 @@ class Skill {  // 플레이어의 skillList에 들어갈 것들. 얘들은 skill
   }
 
   void activate() {
-    isActiveOnReady = true;
+    isActiveOnReady = false;
+    isActiveOnUse = true;
     setCooltime();
+  }
+  void deactivate() {
+    isActiveOnUse = false;
   }
   void setActiveOnReady(boolean bool) {
     isActiveOnReady = bool;
@@ -47,18 +51,26 @@ class Skill {  // 플레이어의 skillList에 들어갈 것들. 얘들은 skill
 
 class Skill1 extends Skill{
   PShape skill1R;
-  PVector moveVelocity;
   Skill1() { // 여기 30 부분에서 각 스킬 쿨타임 변경 가능.
     super(1, true, 30); // 1st, Skill1R
-    this.moveVelocity = new PVector(0, 0);
   }
   
   void activate() {
     super.activate();
-    moveVelocity.set(worldCamera.pos.x + mouseX - p1.location.x, worldCamera.pos.y + mouseY - p1.location.y);
-    println("YEEEE");
+    p1.setMoveSpeed(3);
+    p1.move(worldCamera.pos.x + mouseX, worldCamera.pos.y + mouseY, 100);
+    p1.setStatus('m');
+    p1.setStatus('f');
+    p1.setStatus('s');
   }
-
+  
+  void deactivate() {
+    super.deactivate();
+    p1.setStatus('m');
+    p1.setStatus('f');
+    p1.setStatus('s');
+    p1.setMoveSpeed();
+  }
 }
 
 

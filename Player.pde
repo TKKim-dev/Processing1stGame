@@ -1,13 +1,12 @@
 class Player {
-  int playerNum; // 몇번째 플레이어 인지!
+  float HP;
   PVector location, velocity, pVelocity; // 좌표, 그리고 이동에 관련된 벡터들
   float moveSpeed; // 플레이어의 이동 속도, movSpeed=x은 플레이어가 x pixels per frame 의 속도로 이동함을 뜻함
   float fireSpeed; // 플레이어의 발사 속도. 나중에 공격 속도를 올릴 때는 이 변수를 바꾸면 된다.
   float radius; // 플레이어 개체의 크기
   float distanceLeft; // 이동 시에 사용되는 변수. 이동이 얼마나 남았는지.
-  float CCFrameCount; // CC가 얼마나 지속되는지, =0 일 때 CC 끝
-  //int[] playerStatus=new int[2]; // [플레이어의 체력] [걸린 CC기 개수] [?] [?]
   int[] CCStatus=new int[6]; // 우선 최대 6개까지 동시에 CC기가 걸릴 수 있다고 가정. 각각의 값은 CC번호를 가진다.
+  int[] CCFrameCount = new int[6]; // CC가 얼마나 지속되는지, =0 일 때 CC 끝
   ArrayList<Projectile> projectileList = new ArrayList<Projectile>(); // 각 projectile 은 플레이어가 관리한다.
   ArrayList<CollisionShape> playerCollisionList = new ArrayList<CollisionShape>();
   ArrayList<CollisionShape> projectileCollisionList = new ArrayList<CollisionShape>();
@@ -18,20 +17,25 @@ class Player {
   //Table CCtable = loadTable("CCtable.csv"); // ※아직 구현 안됨※ 미리 정해진 CC 테이블 [CC상태][이동 속도][지속시간(ccframecount)] ex) [0][0] [0][1] [0][2] 순서대로
   //Table WPtable = loadTable("WPtable.csv"); // ※아직 구현 안됨※ [무기 타입] [총알 속도] [무기 쿨타임] [무기 데미지]
   boolean hitEvent;
+  boolean isAbleToMove, isAbleToFire, isAbleToSkill;
+  boolean disableMove, disableFire, disableSkill;
 
-  Player(int playerNum, float x, float y) {
-    this.playerNum=playerNum; // 몇번째 플레이어인지 미리 input
-    moveSpeed = 3;
-    fireSpeed = 2;
+  Player(float x, float y) {
+    HP = 100;
+    moveSpeed = DEFAULT_MOVESPEED;
+    fireSpeed = DEFAULT_FIRESPEED;
     radius = 45;
     location = new PVector(x, y);
     velocity = new PVector(1, 1);
     pVelocity = new PVector(0, 0);
-    skillDirection = new PVector(0, 0); 
-    CCFrameCount = 0;
+    skillDirection = new PVector(0, 0);
     weaponCooltime = 0;
-    /*playerCollisionList.add(*/collisionShape = new CollisionShape('R', location, velocity, radius, radius)/*)*/;  // 플레이어의 모양인 네모,
+    isAbleToMove = true;
+    isAbleToFire = true;
+    isAbleToSkill = true;
+    collisionShape = new CollisionShape('R', location, velocity, radius, radius);  // 플레이어의 모양인 네모,
     hitEvent = false;
+    for(int i=0; i < 6; i++) CCFrameCount[i] = 0; 
   }
 
   void run() {
@@ -42,17 +46,24 @@ class Player {
   }
   
   void move(float destinationX,float destinationY) { 
-        velocity=new PVector(destinationX, destinationY);
-        pVelocity.set(velocity);            // b.set(a): b 벡터를 a 벡터와 같은 내용으로 초기화
-        velocity.sub(location);            // sub(): 벡터의 빼기 연산. 원래의 velocity 벡터는 단순히 mouseX,mouseY 만을 가지므로, 처음 위치에서 빼줄 필요가 있음
-        distanceLeft = velocity.mag();      // mag(): 벡터의 크기를 구하는 연산(즉 총 이동 거리를 구함)
-        velocity.normalize();               // normalize 는 해당 벡터의 크기를 1로 만드는 효과임. 즉 (cosθ,sinθ)가 되어 자동으로 방향을 나타내게 됨
+    velocity = new PVector(destinationX, destinationY);
+    pVelocity.set(velocity);            // b.set(a): b 벡터를 a 벡터와 같은 내용으로 초기화
+    velocity.sub(location);            // sub(): 벡터의 빼기 연산. 원래의 velocity 벡터는 단순히 mouseX,mouseY 만을 가지므로, 처음 위치에서 빼줄 필요가 있음
+    distanceLeft = velocity.mag();      // mag(): 벡터의 크기를 구하는 연산(즉 총 이동 거리를 구함)
+    velocity.normalize();               // normalize 는 해당 벡터의 크기를 1로 만드는 효과임. 즉 (cosθ,sinθ)가 되어 자동으로 방향을 나타내게 됨
+  }
+  void move(float destinationX, float destinationY, float distance) { 
+    velocity = new PVector(destinationX, destinationY);
+    pVelocity.set(velocity);            // b.set(a): b 벡터를 a 벡터와 같은 내용으로 초기화
+    velocity.sub(location);            // sub(): 벡터의 빼기 연산. 원래의 velocity 벡터는 단순히 mouseX,mouseY 만을 가지므로, 처음 위치에서 빼줄 필요가 있음
+    distanceLeft = distance;      // distance 만큼을 이동함
+    velocity.normalize();               // normalize 는 해당 벡터의 크기를 1로 만드는 효과임. 즉 (cosθ,sinθ)가 되어 자동으로 방향을 나타내게 됨
   }
   
   void fireEvent(int type) { // 파이어 이벤트는 발사 방향 & 플레이어 타입, 웨폰타입 전달
     switch(type) {
     case 1:
-      if (isAbleTo('f') == true) {
+      if (isAbleToFire == true) {
         projectileLocation=new PVector(location.x, location.y);
         projectileVelocity=new PVector(worldCamera.pos.x + mouseX-location.x, worldCamera.pos.y + mouseY-location.y);   
         Projectile temp = new Projectile(projectileLocation, projectileVelocity, #ffd400, 60, 6, 35);
@@ -69,14 +80,14 @@ class Player {
     fill(0);
     pushMatrix();
     translate(location.x, location.y);
-    rotate(velocity.heading());
+    //rotate(velocity.heading());
     //rect(0, 0, radius, radius);
     shape(p1Shape, 0, 0);
     popMatrix();
     if (distanceLeft > 0.1) {
       strokeWeight(2);
       stroke(30, 100, 255, 80);
-      if(!isMoving()) {
+      if(!isAbleToMove) {
         stroke(225, 155, 0, 80);
       }
       line(location.x, location.y, pVelocity.x, pVelocity.y);
@@ -94,25 +105,42 @@ class Player {
   }
 
   void update() {                               //플레이어의 다양한 정보 업데이트. 체력 상태, CC상태 등등
-    if (isAbleTo('m') == true && distanceLeft > 0.1) {
-      location.add(velocity.x*moveSpeed, velocity.y*moveSpeed);
-    }
+    isAbleToMove = true;                        // 앞에서 우선 enable 해놓고 조건 검사해서 false 로 만들기!!
+    isAbleToFire = true;
+    isAbleToSkill = true;
     
-    if(CCFrameCount <= 0) {
-      CCStatus[0] = 0;
-      CCFrameCount = 0;
+    if (weaponCooltime > 0) { 
+      isAbleToFire = false;
     }
+    for(int temp : CCStatus) {
+      if(temp >= 10) {
+        isAbleToMove = false;
+        isAbleToFire = false;
+        isAbleToSkill = false;
+      }
+    } 
+    
+    if(disableFire) isAbleToFire = false;
+    if(disableSkill) isAbleToSkill = false;
+    
+    if (isAbleToMove == true && distanceLeft > 0.1) location.add(velocity.x*moveSpeed, velocity.y*moveSpeed);
+    if(disableMove && distanceLeft < 3) /* 움직임 관련 스킬인 경우 여기서 deactivate */ skillList.get(0).deactivate();
+    
   }
 
   void updateCount() { // 무기 쿨타임, 스킬 쿨타임 등을 집중적으로 관리하는 함수
-    if (weaponCooltime > 0) { // 얘는 발사 가능 여부랑 상관없이 줄어들어야 함!
+    if (weaponCooltime > 0) {
       weaponCooltime -= fireSpeed;
     }
-    if (isMoving()) {
+    if (isAbleToMove && distanceLeft > 0.1) {
       distanceLeft -= moveSpeed;
     }
-    if (CCFrameCount > 0) {
-      CCFrameCount--;
+    for(int i=0; i < 6; i++) {
+      if (CCFrameCount[i] > 0) CCFrameCount[i]--;  
+      else {
+        CCStatus[i] = 0;
+        CCFrameCount[i] = 0;      
+      }
     }
     //skill_cooltime[] -= ?  나중에 스킬 관련 쿨타임 감소도 구현하기
   }
@@ -131,42 +159,43 @@ class Player {
   
   void setHitEvent(boolean hitEvent) {
     this.hitEvent = hitEvent;
-    CCStatus[0]=10;
-    CCFrameCount = 50;
+    for(int i = 0; i < 6; i++) {
+      if(CCStatus[i] == 0) {
+        CCStatus[i] = 10;
+        CCFrameCount[i] = 50;
+      }
+    }
   }
 
-  boolean isAbleTo(char type) { // 어떤 행동이 가능한지를 검사하는 함수: m(ove) f(ire) s(kill) true 리턴시에 가능, false 일 경우 행동 제한
+  void setStatus(char type) { // disable 상태를 바꾼다. 예를 들어 disableMove 가 T 일때 F 로 바꿔줌.
     switch(type) {
-    case 'm':  // 이동 가능 여부 판단해주는 파트
-      for (int num : CCStatus) {  // CC상태를 검사해서 10 이상인 것이 하나라도 있다면 '이동 못함: false' 리턴
-        if (num >= 10) {
-          return false;
-        }
-      }
-      return true;
-    case 'f':  // 발사 가능 여부 판단해주는 파트
-      for (int num : CCStatus) {  // CC상태를 검사해서 10 이상인 것이 하나라도 있다면 '공격 못함: false' 리턴
-        if (num >= 10) {
-          return false;
-        }
-      }
-      if (weaponCooltime <= 0) { 
-        return true;
-      }
+    case 'm':  // 이동 제한 여부를 바꿈.
+      if(disableMove) disableMove = false;
+      else disableMove = true;
+    case 'f':  // 발사 제한 여부를 바꿈
+      if(disableFire) disableFire = false;
+      else disableFire = true;
       break;
     case 's':
-      return true;
-      //break;
+      if(disableSkill) disableSkill = false;
+      else disableSkill = true;
+      break;
     }
-    return false;
   }
-
-  boolean isMoving() {
-    if (isAbleTo('m') && distanceLeft>0.01) { // 움직일 수 있고 움직일 거리가 남았다면 움직이는 것으로 가정. 나중에 프레임 카운트 대신 거리 개념으로~!
-      return true;
-    }
-    return false;
+  
+  void setMoveSpeed(float xtimes) {
+    this.moveSpeed *= xtimes;
   }
+  void setMoveSpeed() {
+    this.moveSpeed = DEFAULT_MOVESPEED;
+  }
+  void setFireSpeed(float xtimes) {
+    this.fireSpeed *= xtimes;
+  }
+  void setFireSpeed() {
+    this.moveSpeed = DEFAULT_FIRESPEED;
+  }
+  
 }
 
 
