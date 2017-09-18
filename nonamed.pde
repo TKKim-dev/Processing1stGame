@@ -3,7 +3,6 @@ Player p1; //<>//
 ArrayList<Skill> skillList = new ArrayList<Skill>();
 ArrayList<AI> AIList = new ArrayList<AI>();
 SoundFile hitSound;
-PShape Skill1R;
 PShape AIShape, p1Shape;
 Camera worldCamera;
 float mapWidth, mapHeight; // 나중에 Load 할 맵의 크기. 우선 1600 1200 짜리 맵 써보기
@@ -18,10 +17,10 @@ void setup() {
   p1=new Player(1, 800, 600);
   hitSound = new SoundFile(this, "hitSound.wav");
   background = loadImage("background.jpg");
-  Skill1R = loadShape("1R.svg");
+  
   p1Shape = loadShape("pikachu.svg");
   AIShape = loadShape("zubat.svg");
-  addPlayerSkill(new Skill(1,Skill1R)); // 여기의 SKill1R 은 몇번째 스킬인지랑은 상관 없음! 처음에 무슨 스킬을 고르는지에 따라 여기서 갈리게 됨. (혹은 무슨 직업을 고르는지에 따라)  
+  addPlayerSkill(new Skill1()); // 여기의 SKill1R 은 몇번째 스킬인지랑은 상관 없음! 처음에 무슨 스킬을 고르는지에 따라 여기서 갈리게 됨. (혹은 무슨 직업을 고르는지에 따라)  
   worldCamera = new Camera();
 }
 
@@ -36,6 +35,7 @@ void draw() {
   translate(-worldCamera.pos.x, -worldCamera.pos.y);
   worldCamera.update();
   image(background, 0, 0);
+  background(255);
   p1.run();
   for(AI TEMP : AIList) {
     TEMP.run();
@@ -47,7 +47,7 @@ void draw() {
   }
   text(p1.distanceLeft, p1.location.x-20, p1.location.y-30);
   text(frameRate, width - 20, height - 30);
-  text("Prese SPACE to Add random AI with 100 HP", mapWidth /2 - 140, mapHeight / 2 - 130);
+  text("Prese A KEY to Add random AI with 100 HP", mapWidth /2 - 140, mapHeight / 2 - 130);
   displayProjectiles();
   updateProjectiles();
   if(p1.CCFrameCount > 0) {
@@ -170,7 +170,7 @@ public void mousePressed() {
   if (mouseButton == LEFT) {
     for(Skill temp : skillList) {
       if(temp.isActiveOnReady) {
-        temp.activate(temp.skillNum);
+        temp.activate(); //<>//
         temp.setActiveOnReady(false);
         break;
       }
@@ -194,9 +194,12 @@ public void keyPressed() {
       skillList.get(0).setActiveOnReady(true);
     }
   }
-  if(keyCode == ' ') {
+  if(keyCode == 'A') {
     AI temp = new AI();
     AIList.add(temp);
+  }
+  if(keyCode == ' ') {
+    worldCamera.reset();
   }
   if(keyCode == LEFT) {
     surface.setLocation(400, 400);

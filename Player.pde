@@ -69,7 +69,7 @@ class Player {
     fill(0);
     pushMatrix();
     translate(location.x, location.y);
-    //rotate(velocity.heading());
+    rotate(velocity.heading());
     //rect(0, 0, radius, radius);
     shape(p1Shape, 0, 0);
     popMatrix();
