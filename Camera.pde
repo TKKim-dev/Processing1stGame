@@ -17,6 +17,8 @@ class Camera {
     //  if (key == 's') pos.y += 5;
     //  if (key == 'a') pos.x -= 5;
     //  if (key == 'd') pos.x += 5;
-    
-  }
+    }  
+    void reset() {
+    pos.set(p1.location.x - width / 2, p1.location.y - height / 2);  
+    } 
 }
