@@ -1,15 +1,19 @@
 import processing.sound.*; //<>// //<>//
 Player p1; //<>// //<>//
-ArrayList<Skill> skillList = new ArrayList<Skill>();
-ArrayList<AI> AIList = new ArrayList<AI>();
-SoundFile hitSound;
-PShape AIShape, p1Shape, lightning, AIAttack;
+ArrayList<Skill> skillList = new ArrayList<Skill>(); // 플레이어가 소유한 스킬 리스트
+ArrayList<AI> AIList = new ArrayList<AI>(); // AI 리스트, 나중에 삭제할 것
+ArrayList<Button> buttons = new ArrayList<Button>(); // 메뉴 표시를 위한 버튼 배열
+Button buttonT, buttonH, buttonJ; // 각각 T(테스트 플레이), H(호스트 - 서버 생성), J(서버 조인) 을 뜻함.
+SoundFile hitSound; // 기본 공격 타격 사운드
+PShape AIShape, p1Shape, p1Attack, AIAttack, buttonTShape; // AIShape(AI의 모양)
 Camera worldCamera;
 float mapWidth, mapHeight; // 나중에 Load 할 맵의 크기. 우선 1600 1200 짜리 맵 써보기
 PImage background;
 float DEFAULT_MOVESPEED = 3;
 float DEFAULT_FIRESPEED = 2;
 float DEFAULT_DAMAGE = 1;
+boolean shouldShowMenu;
+char menuSelected;
 
 void setup() {
   mapWidth = 1600;
@@ -23,22 +27,29 @@ void setup() {
   background.resize(width, height);
   p1Shape = loadShape("pikachu.svg");
   AIShape = loadShape("zubat.svg");
-  lightning = loadShape("lightning.svg");
+  p1Attack = loadShape("p1Attack.svg");
   AIAttack = loadShape("zubat_attack.svg");
-  addPlayerSkill(new Skill1()); // 여기의 SKill1R 은 몇번째 스킬인지랑은 상관 없음! 처음에 무슨 스킬을 고르는지에 따라 여기서 갈리게 됨. (혹은 무슨 직업을 고르는지에 따라)  
+  buttonTShape = loadShape("buttonT.svg");
+  addPlayerSkill(new Skill2()); // 여기의 SKill1R 은 몇번째 스킬인지랑은 상관 없음! 처음에 무슨 스킬을 고르는지에 따라 여기서 갈리게 됨. (혹은 무슨 직업을 고르는지에 따라)  
   worldCamera = new Camera();
+  shouldShowMenu = true;
 }
 
 void settings() {
-  fullScreen();
-  //size(600, 600);
+  //fullScreen();
+  size(600, 600);
 }
 
 void draw() {
+  if(!shouldShowMenu) {
+    Menu();
+    point(buttonT.location.x - buttonT.bWidth / 2, buttonT.location.y - buttonT.bHeight / 2);
+    println(buttonT.isPushed);
+    return;
+  }
   pushMatrix();
-  worldCamera.update();  
+  worldCamera.update();
   translate(-worldCamera.pos.x, -worldCamera.pos.y);
-  //image(background, 0, 0);
   background(255);
   p1.run();
   for(AI TEMP : AIList) {
@@ -50,7 +61,7 @@ void draw() {
     }
   }
   text(p1.distanceLeft, p1.location.x-20, p1.location.y-30);
-  text(frameRate, width - 20, height - 30);
+  text(frameRate, width / 2, height / 2);
   text("Prese A KEY to Add random AI with 100 HP", mapWidth /2 - 140, mapHeight / 2 - 130);
   
   updateProjectiles();
@@ -170,20 +181,20 @@ boolean calculateCollision(CollisionShape objectA, CollisionShape objectB) { // 
     }
     return false;
 }
- //<>//
+
 public void mousePressed() {
   if (mouseButton == LEFT) {
     for(Skill temp : skillList) {
       if(temp.isActiveOnReady) {
-        temp.activate(); //<>//
+        temp.activate();
         temp.setActiveOnReady(false);
         break;
       }
-      p1.fireEvent(1); // 일반적인 총알 발사!
+      p1.fireEvent(); // 일반적인 총알 발사!
     }
   }
   if (mouseButton == RIGHT) {
-    if(!p1.disableMove) p1.move(worldCamera.pos.x + mouseX, worldCamera.pos.y + mouseY); // 만약 skillOnReady 가 active 라면.. 그대로 두기!
+    if(!p1.disableMove) p1.move(p1.newMouseX, p1.newMouseY); // 만약 skillOnReady 가 active 라면.. 그대로 두기!
   }
 }
 
@@ -192,7 +203,7 @@ public void keyPressed() {
     if(skillList.get(0).isActiveOnReady && p1.isAbleToSkill) { ///*여기에 스킬 쿨타임 관련 조건 넣기*/) {  // 이미 On 되어있을 때 한번 더 누르면 스킬 취소
       
       skillList.get(0).setActiveOnReady(false);
-    } else {    
+    } else {
       for(int i = 0; i < skillList.size(); i++) { // 다른 스킬의 OnReady 상태일 때 이 스킬을 사용하면 다른 것들을 false 로 만들고 얘만 true 로 설정함!
         skillList.get(i).setActiveOnReady(false);
       }
@@ -203,6 +214,9 @@ public void keyPressed() {
     AI temp = new AI();
     AIList.add(temp);
   }
+  if(keyCode == ' ') {
+    worldCamera.reset();
+  }  
 }
 
 //  ※ 구현해야 하는 것

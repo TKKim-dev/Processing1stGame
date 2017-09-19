@@ -1,6 +1,7 @@
 class Player {
   float HP;
   PVector location, velocity, pVelocity; // 좌표, 그리고 이동에 관련된 벡터들
+  float newMouseX, newMouseY;
   float moveSpeed; // 플레이어의 이동 속도, movSpeed=x은 플레이어가 x pixels per frame 의 속도로 이동함을 뜻함
   float fireSpeed; // 플레이어의 발사 속도. 나중에 공격 속도를 올릴 때는 이 변수를 바꾸면 된다.
   float radius; // 플레이어 개체의 크기
@@ -8,17 +9,17 @@ class Player {
   int[] CCStatus=new int[6]; // 우선 최대 6개까지 동시에 CC기가 걸릴 수 있다고 가정. 각각의 값은 CC번호를 가진다.
   int[] CCFrameCount = new int[6]; // CC가 얼마나 지속되는지, =0 일 때 CC 끝
   ArrayList<Projectile> projectileList = new ArrayList<Projectile>(); // 각 projectile 은 플레이어가 관리한다.
-  ArrayList<CollisionShape> playerCollisionList = new ArrayList<CollisionShape>();
+  //ArrayList<CollisionShape> playerCollisionList = new ArrayList<CollisionShape>();
   ArrayList<CollisionShape> projectileCollisionList = new ArrayList<CollisionShape>();
   PVector projectileLocation, projectileVelocity, skillDirection; // 플레이어가 지정한 공격 위치, 총알이 나가는 방향
   float weaponCooltime; // 다시 발사 가능할때까지 걸리는 시간
-  int weaponType;
   CollisionShape collisionShape;
   //Table CCtable = loadTable("CCtable.csv"); // ※아직 구현 안됨※ 미리 정해진 CC 테이블 [CC상태][이동 속도][지속시간(ccframecount)] ex) [0][0] [0][1] [0][2] 순서대로
   //Table WPtable = loadTable("WPtable.csv"); // ※아직 구현 안됨※ [무기 타입] [총알 속도] [무기 쿨타임] [무기 데미지]
   boolean hitEvent;
   boolean isAbleToMove, isAbleToFire, isAbleToSkill;
   boolean disableMove, disableFire, disableSkill;
+  
 
   Player(float x, float y) {
     HP = 100;
@@ -43,36 +44,6 @@ class Player {
     update();
     updateCount();
     manageProjectiles();
-  }
-  
-  void move(float destinationX,float destinationY) { 
-    velocity = new PVector(destinationX, destinationY);
-    pVelocity.set(velocity);            // b.set(a): b 벡터를 a 벡터와 같은 내용으로 초기화
-    velocity.sub(location);            // sub(): 벡터의 빼기 연산. 원래의 velocity 벡터는 단순히 mouseX,mouseY 만을 가지므로, 처음 위치에서 빼줄 필요가 있음
-    distanceLeft = velocity.mag();      // mag(): 벡터의 크기를 구하는 연산(즉 총 이동 거리를 구함)
-    velocity.normalize();               // normalize 는 해당 벡터의 크기를 1로 만드는 효과임. 즉 (cosθ,sinθ)가 되어 자동으로 방향을 나타내게 됨
-  }
-  void move(float destinationX, float destinationY, float distance) { 
-    velocity = new PVector(destinationX, destinationY);
-    pVelocity.set(velocity);            // b.set(a): b 벡터를 a 벡터와 같은 내용으로 초기화
-    velocity.sub(location);            // sub(): 벡터의 빼기 연산. 원래의 velocity 벡터는 단순히 mouseX,mouseY 만을 가지므로, 처음 위치에서 빼줄 필요가 있음
-    distanceLeft = distance;      // distance 만큼을 이동함
-    velocity.normalize();               // normalize 는 해당 벡터의 크기를 1로 만드는 효과임. 즉 (cosθ,sinθ)가 되어 자동으로 방향을 나타내게 됨
-  }
-  
-  void fireEvent(int type) { // 파이어 이벤트는 발사 방향 & 플레이어 타입, 웨폰타입 전달
-    switch(type) {
-    case 1:
-      if (isAbleToFire == true) {
-        projectileLocation=new PVector(location.x, location.y);
-        projectileVelocity=new PVector(worldCamera.pos.x + mouseX-location.x, worldCamera.pos.y + mouseY-location.y);   
-        Projectile temp = new Projectile(projectileLocation, projectileVelocity, #ffd400, 60, 6, 35);
-        projectileList.add(temp);
-        projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
-        weaponCooltime = 20;  //  무기 쿨타임
-      }
-      break;
-    }
   }
   
   void display() {
@@ -104,6 +75,35 @@ class Player {
     }
   }
 
+  void move(float destinationX,float destinationY) { 
+    velocity = new PVector(destinationX, destinationY);
+    pVelocity.set(velocity);            // b.set(a): b 벡터를 a 벡터와 같은 내용으로 초기화
+    velocity.sub(location);            // sub(): 벡터의 빼기 연산. 원래의 velocity 벡터는 단순히 mouseX,mouseY 만을 가지므로, 처음 위치에서 빼줄 필요가 있음
+    distanceLeft = velocity.mag();      // mag(): 벡터의 크기를 구하는 연산(즉 총 이동 거리를 구함)
+    velocity.normalize();               // normalize 는 해당 벡터의 크기를 1로 만드는 효과임. 즉 (cosθ,sinθ)가 되어 자동으로 방향을 나타내게 됨
+  }
+  void move(float directionX, float directionY, float distance) { 
+    if(!isAbleToMove) return;
+    location.add(directionX * distance, directionY * distance);
+  }
+  
+  void fireEvent() { // 기본 공격 발사. 자동으로 마우스 포지션을 지정하게 됨. //<>//
+    if(!isAbleToFire) return;
+    projectileLocation=new PVector(location.x, location.y);
+    projectileVelocity=new PVector(newMouseX - location.x, newMouseY - location.y);   
+    Projectile temp = new Projectile(projectileLocation, projectileVelocity, p1Attack, 60, 6, 35);
+    projectileList.add(temp);
+    projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
+    weaponCooltime = 20;  //  무기 쿨타임
+  }
+  void fireEvent(float destinationX, float destinationY) {
+    projectileLocation=new PVector(location.x, location.y); //<>//
+    projectileVelocity=new PVector(destinationX - location.x, destinationY - location.y);   
+    Projectile temp = new Projectile(projectileLocation, projectileVelocity, p1Attack, 60, 6, 35);
+    projectileList.add(temp);
+    projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));    
+  }
+  
   void update() {                               //플레이어의 다양한 정보 업데이트. 체력 상태, CC상태 등등
     isAbleToMove = true;                        // 앞에서 우선 enable 해놓고 조건 검사해서 false 로 만들기!!
     isAbleToFire = true;
@@ -121,11 +121,15 @@ class Player {
     } 
     
     if(disableFire) isAbleToFire = false;
-    if(disableSkill) isAbleToSkill = false;
-    
+    if(disableSkill) isAbleToSkill = false;    
     if (isAbleToMove == true && distanceLeft > 0.1) location.add(velocity.x*moveSpeed, velocity.y*moveSpeed);
-    if(disableMove && distanceLeft < 3) /* 움직임 관련 스킬인 경우 여기서 deactivate */ skillList.get(0).deactivate();
     
+    newMouseX = worldCamera.pos.x + mouseX;
+    newMouseY = worldCamera.pos.y + mouseY;
+    
+    for(Skill temp : skillList) {
+      if(temp.isActiveOnUse) temp.update();
+    }    
   }
 
   void updateCount() { // 무기 쿨타임, 스킬 쿨타임 등을 집중적으로 관리하는 함수
@@ -163,6 +167,7 @@ class Player {
       if(CCStatus[i] == 0) {
         CCStatus[i] = 10;
         CCFrameCount[i] = 50;
+        break;
       }
     }
   }
