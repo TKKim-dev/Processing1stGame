@@ -91,15 +91,15 @@ class Player {
     if(!isAbleToFire) return;
     projectileLocation=new PVector(location.x, location.y);
     projectileVelocity=new PVector(newMouseX - location.x, newMouseY - location.y);   
-    Projectile temp = new Projectile(projectileLocation, projectileVelocity, p1Attack, 60, 6, 35);
+    Projectile temp = new Projectile(projectileLocation, projectileVelocity, p1Attack, 60, 16, 35);
     projectileList.add(temp);
     projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));
-    weaponCooltime = 20;  //  무기 쿨타임
+    weaponCooltime = 70;  //  무기 쿨타임
   }
   void fireEvent(float destinationX, float destinationY) {
     projectileLocation=new PVector(location.x, location.y); //<>//
     projectileVelocity=new PVector(destinationX - location.x, destinationY - location.y);   
-    Projectile temp = new Projectile(projectileLocation, projectileVelocity, p1Attack, 60, 6, 35);
+    Projectile temp = new Projectile(projectileLocation, projectileVelocity, p1Attack, 60, 16, 35);
     projectileList.add(temp);
     projectileCollisionList.add(new CollisionShape('R', projectileLocation, projectileVelocity, temp.projectileWidth, temp.projectileHeight));    
   }

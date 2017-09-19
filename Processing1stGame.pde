@@ -30,19 +30,20 @@ void setup() {
   p1Attack = loadShape("p1Attack.svg");
   AIAttack = loadShape("zubat_attack.svg");
   buttonTShape = loadShape("buttonT.svg");
-  addPlayerSkill(new Skill2()); // 여기의 SKill1R 은 몇번째 스킬인지랑은 상관 없음! 처음에 무슨 스킬을 고르는지에 따라 여기서 갈리게 됨. (혹은 무슨 직업을 고르는지에 따라)  
+  addPlayerSkill(new Skill1()); // 여기의 SKill1R 은 몇번째 스킬인지랑은 상관 없음! 처음에 무슨 스킬을 고르는지에 따라 여기서 갈리게 됨. (혹은 무슨 직업을 고르는지에 따라)
+  addPlayerSkill(new Skill2());
   worldCamera = new Camera();
   shouldShowMenu = true;
 }
 
 void settings() {
-  //fullScreen();
-  size(600, 600);
+  fullScreen();
+  //size(600, 600);
 }
 
 void draw() {
   if(!shouldShowMenu) {
-    Menu();
+    //Menu();
     point(buttonT.location.x - buttonT.bWidth / 2, buttonT.location.y - buttonT.bHeight / 2);
     println(buttonT.isPushed);
     return;
@@ -186,7 +187,7 @@ public void mousePressed() {
   if (mouseButton == LEFT) {
     for(Skill temp : skillList) {
       if(temp.isActiveOnReady) {
-        temp.activate();
+        temp.activate(); //<>//
         temp.setActiveOnReady(false);
         break;
       }
@@ -210,6 +211,17 @@ public void keyPressed() {
       skillList.get(0).setActiveOnReady(true);
     }
   }
+  if(keyCode == 'Q') {
+    if(skillList.get(1).isActiveOnReady && p1.isAbleToSkill) { ///*여기에 스킬 쿨타임 관련 조건 넣기*/) {  // 이미 On 되어있을 때 한번 더 누르면 스킬 취소
+      
+      skillList.get(1).setActiveOnReady(false);
+    } else {
+      for(int i = 0; i < skillList.size(); i++) { // 다른 스킬의 OnReady 상태일 때 이 스킬을 사용하면 다른 것들을 false 로 만들고 얘만 true 로 설정함!
+        skillList.get(i).setActiveOnReady(false);
+      }
+      skillList.get(1).setActiveOnReady(true);
+    }
+  }  
   if(keyCode == 'A') {
     AI temp = new AI();
     AIList.add(temp);

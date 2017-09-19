@@ -48,7 +48,7 @@ class Skill {  // 플레이어의 skillList에 들어갈 것들. 얘들은 skill
 class Skill1 extends Skill{
   PShape skill1R;
   Skill1() { // 여기 30 부분에서 각 스킬 쿨타임 변경 가능.
-    super(2, true, 30); // 1st, Skill1R
+    super(1, true, 30); // 1st, Skill1R
   }
   
   void activate() {
@@ -72,7 +72,7 @@ class Skill1 extends Skill{
   void update() {
     super.update();
     if(skillTime > 0) {
-      p1.move(direction.x, direction.y, 5);
+      p1.move(direction.x, direction.y, 16);
       skillTime--;
       return;
     }
@@ -84,15 +84,16 @@ class Skill2 extends Skill{
   PShape skill2R;
   float delayTime = 10;
   Skill2() {
-    super(1, true, 50);
+    super(2, true, 50);
   }
   
   void activate() {
-    super.activate();
+    super.activate(); //<>//
+    direction = new PVector(p1.newMouseX, p1.newMouseY);
     p1.setMoveSpeed(0.5);
     p1.setStatus('f');
     p1.setStatus('s');
-    skillTime = 20;
+    skillTime = 32;
   }
   void deactivate() {
     super.deactivate();
@@ -102,7 +103,8 @@ class Skill2 extends Skill{
   }
   void update() {
     super.update();
-    if(skillTime % 3 == 0) p1.fireEvent(random(p1.newMouseX - 30, p1.newMouseX + 30), random(p1.newMouseY - 30, p1.newMouseY + 30)); 
+    if(skillTime % 10 == 0) p1.fireEvent(random(direction.x - 65, direction.x + 65), random(direction.y - 65, direction.y + 65)); 
+    if(!p1.isAbleToMove) deactivate();
   }
 }
 
