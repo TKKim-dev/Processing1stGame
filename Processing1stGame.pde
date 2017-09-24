@@ -2,7 +2,12 @@ import processing.sound.*; //<>// //<>// //<>//
 import java.net.*;
 
 PFont pf;
-int serverConnectionTime = 10000; // 서버가 몇 초 동안 클라이언트 접속을 기다릴건지
+int keyNum = 0;
+char[] portChar = {0,0,0,0,0,0};
+char[] addressChar = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+int portNum;
+byte [] addressNum = {0,0,0,0};
+int serverConnectionTime = 30000; // 서버가 몇 초 동안 클라이언트 접속을 기다릴건지
 int runState; // 0: 메뉴 || 1. 서버 호스트 모드 || 2: (클라이언트) 서버 연결 모드 || 3: 네트워크 플레이 || 4: AI와 플레이
 Player p1; //<>// //<>// //<>//
 ArrayList<Skill> skillList = new ArrayList<Skill>(); // 플레이어가 소유한 스킬 리스트
@@ -13,13 +18,15 @@ SoundFile hitSound; // 기본 공격 타격 사운드
 PShape AIShape, p1Shape, p1Attack, AIAttack, buttonTShape; // AIShape(AI의 모양)
 Camera worldCamera;
 Server server;
+Client client;
 float mapWidth, mapHeight; // 나중에 Load 할 맵의 크기. 우선 1600 1200 짜리 맵 써보기
 PImage background;
 float DEFAULT_MOVESPEED = 3;
 float DEFAULT_FIRESPEED = 2;
 float DEFAULT_DAMAGE = 1;
 boolean shouldShowMenu;
-boolean shouldCreateServer;
+boolean shouldCreateServer, shouldCreateClient;
+boolean getPortInput, getAddressInput;
 char menuSelected;
 
 void setup() {
@@ -45,16 +52,19 @@ void setup() {
   worldCamera = new Camera();
   shouldShowMenu = true;
   shouldCreateServer = true;
+  shouldCreateClient = true;
+  getPortInput = true;
+  getAddressInput = true;
 }
 
 void settings() {
-  //fullScreen();
-  size(600, 600);
+  fullScreen();
+  //size(600, 600);
 }
 
 void draw() {
   switch(runState) {
-    case 0: // #######메뉴#######
+    case 0:
       background(0);
       textAlign(LEFT);
       textFont(pf, 36);
@@ -66,10 +76,17 @@ void draw() {
         switch(key) {
           case 49: // 1번 선택
             runState = 1;
-            if(!shouldCreateServer) server.connectionStandbyTime = millis(); // 서버를 선택했다가 시간 안에 클라이언트가 접속하지 않은 경우, 다시 시간을 리셋
+            keyNum = 0;
+            if(!shouldCreateServer) {
+              server.connectionStandbyTime = millis(); // 서버를 선택했다가 시간 안에 클라이언트가 접속하지 않은 경우, 다시 시간을 리셋 //<>//
+              getPortInput = true;
+            }
             return;
           case 50: // 2번 선택
             runState = 2;
+            keyNum = 0;
+            getAddressInput = true;
+            getPortInput = true;
             return;
           case 51: // 3번 선택
             runState = 4;
@@ -77,31 +94,81 @@ void draw() {
         } //switch(keyCode)
       } //if(keyPressed)
       break;
-      
+//####################################################MENU 표시######################################################################      
     case 1: // #######서버 호스트 모드#######
-      try {
-        if(shouldCreateServer) {
-          server = new Server(8282);
-          shouldCreateServer = false;
+        if(getPortInput) {
+          background(0);
+          text("Input Port Number (1024 ~ 65535): " + new String(portChar, 0, 5), 0, 50);
+          inputUserPort();
+          portNum = 0;
+          for(int i = 0; portChar[i] != 0; i++) portNum += (portChar[i] - '0') * Math.pow(10, 4 - i);
+          return;
         }
+        if(portNum > 65535 || portNum < 1024) {
+          runState = 0;
+          return;
+        }
+        if(shouldCreateServer) {
+          try {
+            server = new Server(portNum);
+            server.connectionStandbyTime = millis();
+          } catch(SocketException e) { //try
+            background(0);
+            text("That Port is Already in Use!", 0, 50);
+            runState = 0;
+            getPortInput = true;
+            delay(3000);
+            return;
+          } //catch
+          shouldCreateServer = false;
+        } //if
         background(0);
         textAlign(CENTER);
         textFont(pf, 36);
-        text("Connection Time Left : " + int((serverConnectionTime - millis() + server.connectionStandbyTime) / 1000), width / 2, 50);
+        text("Port Number: "+ new String(portChar) + "  Connection Time Left : " + int((serverConnectionTime - millis() + server.connectionStandbyTime) / 1000), width / 2, 50);
         for(int i = 0; i < server.addressList.size(); i++) text("Connection Established with - " + server.addressList.get(i).getHostAddress() + ": " + server.portList.get(i), width / 2, 100 + i * 100); 
-        server.initialConnection();
-      } catch (Exception e) {
-      } //catch
+        try {
+          server.initialConnection();
+        } catch(Exception e) {
+        }
       break;
-      
+//####################################################서버 호스트 모드시######################################################################      
     case 2: // #######(클라이언트) 서버 연결 모드#######
-      //Client(); // 서버의 InetAddress 와 포트를 입력해야함.
+      if(getAddressInput) {
+        background(0);
+        text("Input Host's IP Address : " + new String(addressChar, 0, 3) + "." + new String(addressChar, 3, 3) + "." + new String(addressChar, 6, 3) + "." + new String(addressChar, 9, 3), 0, 50);
+        inputUserAddress();
+        for(int i = 0; i < addressNum.length; i++) addressNum[i] = 0;
+        for(int i = 0; addressChar[i] != 0; i++) addressNum[(i / 3) % 4] += (addressChar[i] - '0') * Math.pow(10, 2 - (i % 3));
+        return;     
+      }
+      if(getPortInput) {
+        background(0);
+        text("Input Host's Port Number (1024 ~ 65535): " + new String(portChar, 0, 5), 0, 50);
+        inputUserPort();
+        portNum = 0;
+        for(int i = 0; portChar[i] != 0; i++) portNum += (portChar[i] - '0') * Math.pow(10, 4 - i);
+        return;
+      }
+      if(shouldCreateClient) {
+        try {
+          InetAddress ia = InetAddress.getByAddress(addressNum);
+          client = new Client(ia, portNum); // 서버의 InetAddress 와 포트를 입력해야함.
+        } catch(Exception e) {
+          e.printStackTrace();
+          shouldCreateClient = true;
+          runState = 0;
+          return;
+        }
+        shouldCreateClient = false;
+      }
+      client.sendPacket(addressNum);
       break;
-      
-    case 3: // #######네트워크 플레이!#######
+//####################################################클라이언트 JOIN 모드시######################################################################      
+    case 3: 
       break;
-      
-    case 4: // #######AI와 플레이!#######
+//####################################################실질적인 네트워크 플레이 모드######################################################################      
+    case 4: 
       pushMatrix();
       worldCamera.update();
       translate(-worldCamera.pos.x, -worldCamera.pos.y);
@@ -128,8 +195,9 @@ void draw() {
       } //if(p1
       popMatrix();  
       break;
+//####################################################AI와 플레이######################################################################      
   } //switch(runState)
-}
+} //draw()
 
 public void addPlayerSkill(Skill skill) {
     skillList.add(skill);
@@ -288,6 +356,51 @@ public void keyPressed() {
   }  
 }
 
+void inputUserPort() { //사용자가 직접 포트 번호를 입력
+  if(keyPressed) {
+    if(key == 8 && keyNum > 0) {
+      delay(80);
+      portChar[keyNum] = 0;
+      portChar[keyNum - 1] = 0;
+      if(keyNum != 0) keyNum--;
+      return;
+    }
+    if(key >= 48 && key <= 57 && keyNum < 5) {
+      delay(100);
+      portChar[keyNum] = key;
+      keyNum++;
+      return;
+    }
+    if(key == ENTER) {
+      if(portNum != 0) getPortInput = false;
+      keyNum = 0;
+      return;
+    }
+  }
+}
+
+void inputUserAddress() { //사용자가 직접 IP 주소를 입력
+  if(keyPressed) {
+    if(key == 8 && keyNum > 0) {
+      delay(80);
+      addressChar[keyNum] = 0;
+      addressChar[keyNum - 1] = 0;
+      if(keyNum != 0) keyNum--;
+      return;
+    }
+    if(key >= 48 && key <= 57 && keyNum < 12) {
+      delay(100);
+      addressChar[keyNum] = key;
+      keyNum++;
+      return;
+    }
+    if(key == ENTER) {
+      if(addressNum[3] != 0) getAddressInput = false;
+      keyNum = 0;      
+      return;
+    }
+  }
+}
 //  ※ 구현해야 하는 것
 // ※플레이어와 AI에 PShape 로 적당한 이미지 찾아서 넣고, 그에 알맞게 충돌 범위 구현해놓기.
 // ※Shift 스킬 사용 효과 만들기. 플레이어 스킬[0]에 Skill1R 을 할당하는 것.

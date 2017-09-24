@@ -6,7 +6,7 @@ class Client { // 클라이언트 클래스가 하는 일: 데이터 전송, 데
   Client(InetAddress ia, int portNum) throws Exception{ // 전송할 InetAddress에 대한 정보, ia 는 전송할 
     this.ia = ia; 
     this.portNum = portNum;
-    ds = new DatagramSocket(portNum);
+    ds = new DatagramSocket(portNum + int(random(0, 100)));
   }
   
   void update() {
@@ -17,5 +17,10 @@ class Client { // 클라이언트 클래스가 하는 일: 데이터 전송, 데
   
   void sendPacket(byte[] buffer) { // 서버에게 패킷을 전송함
     DatagramPacket dps = new DatagramPacket(buffer, buffer.length, ia, portNum);
+    try {
+      ds.send(dps);
+    } catch(IOException ie) {
+      ie.printStackTrace();
+    }    
   }
 }
