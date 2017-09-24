@@ -82,12 +82,12 @@ class Player {
     distanceLeft = velocity.mag();      // mag(): 벡터의 크기를 구하는 연산(즉 총 이동 거리를 구함)
     velocity.normalize();               // normalize 는 해당 벡터의 크기를 1로 만드는 효과임. 즉 (cosθ,sinθ)가 되어 자동으로 방향을 나타내게 됨
   }
-  void move(float directionX, float directionY, float distance) { 
+  void move(float directionX, float directionY, float distance) { // 비자발적 움직임의 경우
     if(!isAbleToMove) return;
     location.add(directionX * distance, directionY * distance);
   }
   
-  void fireEvent() { // 기본 공격 발사. 자동으로 마우스 포지션을 지정하게 됨. //<>//
+  void fireEvent() { // 기본 공격 발사. 자동으로 마우스 포지션을 지정하게 됨. //<>// //<>//
     if(!isAbleToFire) return;
     projectileLocation=new PVector(location.x, location.y);
     projectileVelocity=new PVector(newMouseX - location.x, newMouseY - location.y);   
@@ -97,7 +97,7 @@ class Player {
     weaponCooltime = 70;  //  무기 쿨타임
   }
   void fireEvent(float destinationX, float destinationY) {
-    projectileLocation=new PVector(location.x, location.y); //<>//
+    projectileLocation=new PVector(location.x, location.y); //<>// //<>//
     projectileVelocity=new PVector(destinationX - location.x, destinationY - location.y);   
     Projectile temp = new Projectile(projectileLocation, projectileVelocity, p1Attack, 60, 16, 35);
     projectileList.add(temp);

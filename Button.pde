@@ -18,6 +18,6 @@ class Button {
   }
   
   void mousePressed() {
-    if(worldCamera.pos.x + mouseX > location.x - bWidth / 2 && worldCamera.pos.x + mouseX < location.x + bWidth / 2 && worldCamera.pos.y + mouseY > location.y - bHeight / 2 && worldCamera.pos.y + mouseY < location.y + bHeight / 2) isPushed = true;  //<>//
+    if(worldCamera.pos.x + mouseX > location.x - bWidth / 2 && worldCamera.pos.x + mouseX < location.x + bWidth / 2 && worldCamera.pos.y + mouseY > location.y - bHeight / 2 && worldCamera.pos.y + mouseY < location.y + bHeight / 2) isPushed = true;  //<>// //<>//
   }
 }

@@ -1,4 +1,4 @@
-class Projectile { // 이건 총알 뿐만이 아니라 각종 투사체를 모두 관리하는 클래스. //<>// //<>// //<>//
+class Projectile { // 이건 총알 뿐만이 아니라 각종 투사체를 모두 관리하는 클래스. //<>// //<>// //<>// //<>//
   PVector location, velocity;
   float projectileWidth;
   float projectileHeight;

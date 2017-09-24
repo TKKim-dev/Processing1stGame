@@ -44,7 +44,7 @@ class AI {
     popMatrix();
     stroke(225, 111, 0, 100);
     line(location.x, location.y, pvelocity.x, pvelocity.y);
-    text(int(HP), location.x - 10, location.y - 30);
+    text(int(HP), location.x, location.y - 30);
   }
   
   void randomize() {

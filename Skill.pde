@@ -88,7 +88,7 @@ class Skill2 extends Skill{
   }
   
   void activate() {
-    super.activate(); //<>//
+    super.activate(); //<>// //<>//
     direction = new PVector(p1.newMouseX, p1.newMouseY);
     p1.setMoveSpeed(0.5);
     p1.setStatus('f');

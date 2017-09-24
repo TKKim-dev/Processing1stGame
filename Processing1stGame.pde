@@ -1,5 +1,10 @@
-import processing.sound.*; //<>// //<>//
-Player p1; //<>// //<>//
+import processing.sound.*; //<>// //<>// //<>//
+import java.net.*;
+
+PFont pf;
+int serverConnectionTime = 10000; // 서버가 몇 초 동안 클라이언트 접속을 기다릴건지
+int runState; // 0: 메뉴 || 1. 서버 호스트 모드 || 2: (클라이언트) 서버 연결 모드 || 3: 네트워크 플레이 || 4: AI와 플레이
+Player p1; //<>// //<>// //<>//
 ArrayList<Skill> skillList = new ArrayList<Skill>(); // 플레이어가 소유한 스킬 리스트
 ArrayList<AI> AIList = new ArrayList<AI>(); // AI 리스트, 나중에 삭제할 것
 ArrayList<Button> buttons = new ArrayList<Button>(); // 메뉴 표시를 위한 버튼 배열
@@ -7,15 +12,20 @@ Button buttonT, buttonH, buttonJ; // 각각 T(테스트 플레이), H(호스트 
 SoundFile hitSound; // 기본 공격 타격 사운드
 PShape AIShape, p1Shape, p1Attack, AIAttack, buttonTShape; // AIShape(AI의 모양)
 Camera worldCamera;
+Server server;
 float mapWidth, mapHeight; // 나중에 Load 할 맵의 크기. 우선 1600 1200 짜리 맵 써보기
 PImage background;
 float DEFAULT_MOVESPEED = 3;
 float DEFAULT_FIRESPEED = 2;
 float DEFAULT_DAMAGE = 1;
 boolean shouldShowMenu;
+boolean shouldCreateServer;
 char menuSelected;
 
 void setup() {
+  pf = loadFont("HGS-36.vlw");
+  runState = 0; // 우선 메뉴 표시부터 해야하지만 아직 구현이 안되었으므로 클라이언트 연결부터
+  background(0);
   mapWidth = 1600;
   mapHeight = 1200;
   smooth();
@@ -34,44 +44,91 @@ void setup() {
   addPlayerSkill(new Skill2());
   worldCamera = new Camera();
   shouldShowMenu = true;
+  shouldCreateServer = true;
 }
 
 void settings() {
-  fullScreen();
-  //size(600, 600);
+  //fullScreen();
+  size(600, 600);
 }
 
 void draw() {
-  if(!shouldShowMenu) {
-    //Menu();
-    point(buttonT.location.x - buttonT.bWidth / 2, buttonT.location.y - buttonT.bHeight / 2);
-    println(buttonT.isPushed);
-    return;
-  }
-  pushMatrix();
-  worldCamera.update();
-  translate(-worldCamera.pos.x, -worldCamera.pos.y);
-  background(255);
-  p1.run();
-  for(AI TEMP : AIList) {
-    TEMP.run();
-  }
-  for(int i=0; i < AIList.size(); i++) {
-    if(!AIList.get(i).isActive) {
-      AIList.remove(i);
-    }
-  }
-  text(p1.distanceLeft, p1.location.x-20, p1.location.y-30);
-  text(frameRate, width / 2, height / 2);
-  text("Prese A KEY to Add random AI with 100 HP", mapWidth /2 - 140, mapHeight / 2 - 130);
+  switch(runState) {
+    case 0: // #######메뉴#######
+      background(0);
+      textAlign(LEFT);
+      textFont(pf, 36);
+      text("Select Menu: ", 60, 50);
+      text("Press 1 to Host New Server", 0, 90);
+      text("Press 2 to Join Private Server", 0, 130);
+      text("Press 3 to Play With AI", 0, 170);
+      if(keyPressed) {
+        switch(key) {
+          case 49: // 1번 선택
+            runState = 1;
+            if(!shouldCreateServer) server.connectionStandbyTime = millis(); // 서버를 선택했다가 시간 안에 클라이언트가 접속하지 않은 경우, 다시 시간을 리셋
+            return;
+          case 50: // 2번 선택
+            runState = 2;
+            return;
+          case 51: // 3번 선택
+            runState = 4;
+            return;
+        } //switch(keyCode)
+      } //if(keyPressed)
+      break;
+      
+    case 1: // #######서버 호스트 모드#######
+      try {
+        if(shouldCreateServer) {
+          server = new Server(8282);
+          shouldCreateServer = false;
+        }
+        background(0);
+        textAlign(CENTER);
+        textFont(pf, 36);
+        text("Connection Time Left : " + int((serverConnectionTime - millis() + server.connectionStandbyTime) / 1000), width / 2, 50);
+        for(int i = 0; i < server.addressList.size(); i++) text("Connection Established with - " + server.addressList.get(i).getHostAddress() + ": " + server.portList.get(i), width / 2, 100 + i * 100); 
+        server.initialConnection();
+      } catch (Exception e) {
+      } //catch
+      break;
+      
+    case 2: // #######(클라이언트) 서버 연결 모드#######
+      //Client(); // 서버의 InetAddress 와 포트를 입력해야함.
+      break;
+      
+    case 3: // #######네트워크 플레이!#######
+      break;
+      
+    case 4: // #######AI와 플레이!#######
+      pushMatrix();
+      worldCamera.update();
+      translate(-worldCamera.pos.x, -worldCamera.pos.y);
+      background(255);
+      p1.run();
+      for(AI TEMP : AIList) {
+        TEMP.run();
+      } //for(AI TEMP~
+      for(int i=0; i < AIList.size(); i++) {
+        if(!AIList.get(i).isActive) {
+          AIList.remove(i);
+        } //if(~AI~
+      } //for(int~
+      textFont(pf, 24);
+      text(int(p1.distanceLeft), p1.location.x, p1.location.y-30);
+      text(frameRate, width / 2, height / 2);
+      text("Prese A KEY to Add random AI with 100 HP", mapWidth /2 - 140, mapHeight / 2 - 130);
   
-  updateProjectiles();
-  displayProjectiles();
-  if(p1.CCFrameCount[0] > 0) {
-    fill(255, 0, 0);
-    text(p1.CCFrameCount[0], p1.location.x - 7, p1.location.y + 35);
-  }
-  popMatrix();
+      updateProjectiles();
+      displayProjectiles();
+      if(p1.CCFrameCount[0] > 0) {
+        fill(255, 0, 0);
+        text(p1.CCFrameCount[0], p1.location.x - 7, p1.location.y + 35);
+      } //if(p1
+      popMatrix();  
+      break;
+  } //switch(runState)
 }
 
 public void addPlayerSkill(Skill skill) {
@@ -138,12 +195,12 @@ boolean calculateCollision(CollisionShape objectA, CollisionShape objectB) { // 
        float verValue = (temp.y - objectA.location.y) * objectA.direction.x - (temp.x - objectA.location.x) * objectA.direction.y;
        if(horValue < 0) {
          horValue *= -1;
-       }  //<>//
+       } 
        if(verValue < 0) {
          verValue *= -1;
        }
        if(horValue < objectA.shapeWidth/2 && verValue < objectA.shapeHeight/2) {  // 충돌 감지!
-         return true; //<>//
+         return true;
        }
      }
      for(PVector temp : coordinatesA) {
@@ -187,7 +244,7 @@ public void mousePressed() {
   if (mouseButton == LEFT) {
     for(Skill temp : skillList) {
       if(temp.isActiveOnReady) {
-        temp.activate(); //<>//
+        temp.activate();
         temp.setActiveOnReady(false);
         break;
       }
