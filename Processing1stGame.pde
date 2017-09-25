@@ -1,4 +1,4 @@
-import processing.sound.*; //<>// //<>// //<>//
+//import processing.sound.*; //<>// //<>// //<>//
 import java.net.*;
 
 PFont pf;
@@ -14,7 +14,7 @@ ArrayList<Skill> skillList = new ArrayList<Skill>(); // 플레이어가 소유�
 ArrayList<AI> AIList = new ArrayList<AI>(); // AI 리스트, 나중에 삭제할 것
 ArrayList<Button> buttons = new ArrayList<Button>(); // 메뉴 표시를 위한 버튼 배열
 Button buttonT, buttonH, buttonJ; // 각각 T(테스트 플레이), H(호스트 - 서버 생성), J(서버 조인) 을 뜻함.
-SoundFile hitSound; // 기본 공격 타격 사운드
+//SoundFile hitSound; // 기본 공격 타격 사운드
 PShape AIShape, p1Shape, p1Attack, AIAttack, buttonTShape; // AIShape(AI의 모양)
 Camera worldCamera;
 Server server;
@@ -39,7 +39,7 @@ void setup() {
   frameRate(75);
   rectMode(CENTER);
   p1=new Player(800, 600);
-  hitSound = new SoundFile(this, "hitSound.wav");
+  //hitSound = new SoundFile(this, "hitSound.wav");
   background = loadImage("background.jpg");
   background.resize(width, height);
   p1Shape = loadShape("pikachu.svg");
@@ -58,8 +58,8 @@ void setup() {
 }
 
 void settings() {
-  fullScreen();
-  //size(600, 600);
+  //fullScreen();
+  size(600, 600);
 }
 
 void draw() {
@@ -78,7 +78,7 @@ void draw() {
             runState = 1;
             keyNum = 0;
             if(!shouldCreateServer) {
-              server.connectionStandbyTime = millis(); // 서버를 선택했다가 시간 안에 클라이언트가 접속하지 않은 경우, 다시 시간을 리셋 //<>//
+              server.connectionStandbyTime = millis(); // 서버를 선택했다가 시간 안에 클라이언트가 접속하지 않은 경우, 다시 시간을 리셋
               getPortInput = true;
             }
             return;
@@ -112,7 +112,7 @@ void draw() {
           try {
             server = new Server(portNum);
             server.connectionStandbyTime = millis();
-          } catch(SocketException e) { //try
+          } catch(Exception e) { //try
             background(0);
             text("That Port is Already in Use!", 0, 50);
             runState = 0;
@@ -131,8 +131,9 @@ void draw() {
           server.initialConnection();
         } catch(Exception e) {
         }
+        if(server.isActive) runState = 3;
       break;
-//####################################################서버 호스트 모드시######################################################################      
+//####################################################서버 호스트 모드######################################################################      
     case 2: // #######(클라이언트) 서버 연결 모드#######
       if(getAddressInput) {
         background(0);
@@ -162,10 +163,22 @@ void draw() {
         }
         shouldCreateClient = false;
       }
-      client.sendPacket(addressNum);
+      if(client.isActive) runState = 3;
+      else runState = 0;
       break;
 //####################################################클라이언트 JOIN 모드시######################################################################      
-    case 3: 
+    case 3:
+      try {
+        background(0);
+        text("NETWORK MODE", 0, 50);
+        if(!shouldCreateServer) {
+          server.update(); //<>//
+        } //if
+        client.update(); //<>//
+      } catch (Exception e) { //<>//
+        e.printStackTrace();
+      } //catch
+
       break;
 //####################################################실질적인 네트워크 플레이 모드######################################################################      
     case 4: 
@@ -223,7 +236,7 @@ public void updateProjectiles() {
       if(calculateCollision(AITemp.collisionShape,temp.projectileCollisionShape)) {  // projectile 상태를 업데이트 할 때(이동시킬 때) 충돌 판정도 같이 함!
         temp.deactivate();
         AITemp.setHitEvent(true);
-        hitSound.play();
+        //hitSound.play();
       }
     }
   }
@@ -401,6 +414,8 @@ void inputUserAddress() { //사용자가 직접 IP 주소를 입력
     }
   }
 }
+
+
 //  ※ 구현해야 하는 것
 // ※플레이어와 AI에 PShape 로 적당한 이미지 찾아서 넣고, 그에 알맞게 충돌 범위 구현해놓기.
 // ※Shift 스킬 사용 효과 만들기. 플레이어 스킬[0]에 Skill1R 을 할당하는 것.

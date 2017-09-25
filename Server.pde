@@ -5,20 +5,18 @@ class Server { // 서버로 선택된 경우 화이트보드 데이터를 지속
   ArrayList<Integer> portList = new ArrayList<Integer>(); // 플레이어들의 포트
   int connectionStandbyTime;
   boolean shouldWaitConnection;
-  ArrayList<Integer> playerX = new ArrayList<Integer>();
-  ArrayList<Integer> playerY = new ArrayList<Integer>();
+  ArrayList<Float> playerX = new ArrayList<Float>();
+  ArrayList<Float> playerY = new ArrayList<Float>();
+  byte[] test = "192.01,168.02".getBytes();
+  boolean isActive;
   
-  Server(int serverPortNum) throws Exception { // 생성자: 데이터를 수신할 포트 주소
+  Server(int serverPortNum) throws SocketException { // 생성자: 데이터를 수신할 포트 주소
     this.serverPortNum = serverPortNum;
     shouldWaitConnection = true;
     ds = new DatagramSocket(serverPortNum);
     ds.setSoTimeout(10);
   }
   void update() throws Exception {
-    if(shouldWaitConnection) {
-      initialConnection(); 
-      return;
-    }
     receivePacket();
     sendPacket();
   } //update()
@@ -26,12 +24,12 @@ class Server { // 서버로 선택된 경우 화이트보드 데이터를 지속
   void receivePacket() throws Exception{
     DatagramPacket dpr = new DatagramPacket(new byte[1024], 1024);
     ds.receive(dpr);
-  } //receivePacket  
+  } //receivePacket
   void sendPacket() throws Exception{
     for(int i = 0; i < addressList.size(); i++) {
-      //DatagramPacket dps = new DatagramPacket(화이트보드 데이터, 데이터길이, addressList.get(i), portList.get(i));
-      //ds.send(dps);
-    }    
+      DatagramPacket dps = new DatagramPacket(test, test.length, addressList.get(i), portList.get(i));
+      ds.send(dps);
+    }
   } //sendPacket
   void sendInitialPacket() throws Exception{ // 처음에 Connection Establish 할 때 연결된 모든 클라이언트에게 패킷 전송하는 메서드
     if(!addressList.isEmpty()) {
@@ -48,7 +46,7 @@ class Server { // 서버로 선택된 경우 화이트보드 데이터를 지속
       DatagramPacket dpr = new DatagramPacket(new byte[1024], 1024);
       ds.receive(dpr);
       if(dpr.getPort() != -1 && !addressList.contains(dpr.getAddress())) {
-        println("Connection Established with - " + dpr.getAddress().getHostAddress() + ": " + dpr.getPort());
+        //println("Connection Established with - " + dpr.getAddress().getHostAddress() + ": " + dpr.getPort());
         addressList.add(dpr.getAddress());
         portList.add(dpr.getPort());
       } //if(dpr~
@@ -57,7 +55,8 @@ class Server { // 서버로 선택된 경우 화이트보드 데이터를 지속
       println("-----------Connection List-----------");
       for(int i = 0; i < addressList.size(); i++) println(i + 1 + "번째 플레이어: " + addressList.get(i).getHostAddress() + ": " + portList.get(i));    
       shouldWaitConnection = false; // 더이상 연결을 기다리지 않음. initialConnection 으로 분기되지 않음.
-      runState += 2; // runState 를 1(호스트) 에서 3(네트워크 플레이)로!
+      runState = 3; // runState 를 1(호스트) 에서 3(네트워크 플레이)로!
+      isActive = true;
     } else { //else if
       runState = 0; // 
     }
